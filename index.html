@@ -1,152 +1,947 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#e5447a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="format-detection" content="telephone=no" />
-  <title>献给世界上最好的妈妈 · 母亲节快乐</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#e5447a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=no" />
+<title>献给世界上最好的妈妈 · 母亲节快乐</title>
+<style>
+/* ================= 基础 ================= */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;overflow-x:hidden;scroll-behavior:smooth;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",serif;color:#4a2b3a;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;background:#fff0f5}
+body{min-height:100vh;min-height:100dvh}
+.brush{font-family:"华文行楷","华文楷体","KaiTi","STKaiti","楷体",serif;font-weight:bold}
+
+/* ================= 背景 canvas ================= */
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+
+/* ================= 进度指示器 ================= */
+.nav-dots{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:10px}
+.nav-dots button{width:10px;height:10px;border-radius:50%;border:2px solid #e5447a;background:transparent;cursor:pointer;padding:0;transition:all .3s;-webkit-appearance:none}
+.nav-dots button.active{background:#e5447a;transform:scale(1.4);box-shadow:0 0 8px rgba(229,68,122,.5)}
+
+/* ================= 章节通用 ================= */
+.screen{position:relative;width:100%;min-height:100vh;min-height:100dvh;padding:72px 20px 60px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:1}
+.section-title{font-size:38px;color:#e5447a;letter-spacing:4px;margin-bottom:8px;line-height:1.3;text-shadow:0 3px 14px rgba(229,68,122,.2)}
+.section-sub{color:#a84b6b;letter-spacing:2px;margin-bottom:32px;font-size:14px}
+
+/* ================= 滚动向下提示 ================= */
+.scroll-tip{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:#c1527a;font-size:12px;letter-spacing:2px;opacity:.7;animation:bounce 2s ease-in-out infinite;cursor:pointer;padding:6px 12px}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+
+/* ================= 花瓣雨背景 ================= */
+.petals{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.petal-item{position:absolute;top:-40px;width:14px;height:14px;background:radial-gradient(circle at 30% 30%,#ffb3c6,#ff7aa2 70%,#e5447a);border-radius:150% 0 150% 0;opacity:.7;filter:drop-shadow(0 2px 4px rgba(229,68,122,.2));animation:fall linear infinite;will-change:transform}
+@keyframes fall{0%{transform:translate3d(0,-10vh,0) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translate3d(60px,110vh,0) rotate(540deg);opacity:.1}}
+
+/* ================= 1. 封面信封 ================= */
+.screen-cover{background:
+  radial-gradient(ellipse at 30% 20%,rgba(255,200,220,.6),transparent 50%),
+  radial-gradient(ellipse at 70% 80%,rgba(255,180,210,.5),transparent 50%),
+  linear-gradient(135deg,#fff0f5 0%,#ffd6e4 100%)}
+.envelope-wrap{position:relative;width:280px;max-width:85vw;aspect-ratio:3/2;perspective:1200px;margin-bottom:28px;-webkit-touch-callout:none;user-select:none}
+.envelope{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1.5s cubic-bezier(.68,-.55,.27,1.55)}
+.env-back{position:absolute;inset:0;background:linear-gradient(135deg,#ffb6d1,#e5447a);border-radius:10px;box-shadow:0 20px 40px rgba(229,68,122,.35)}
+.env-flap{position:absolute;top:0;left:0;width:100%;height:60%;background:linear-gradient(135deg,#ffcce0,#ff9ab8);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform 1.3s cubic-bezier(.68,-.55,.27,1.55);z-index:3}
+.env-body{position:absolute;bottom:0;left:0;width:100%;height:70%;background:linear-gradient(135deg,#ff9ab8,#e5447a);border-radius:0 0 10px 10px;z-index:2}
+.env-letter{position:absolute;bottom:8%;left:6%;width:88%;height:75%;background:linear-gradient(180deg,#fffaf0,#fff5ea);border-radius:4px;box-shadow:inset 0 0 20px rgba(229,68,122,.1),0 4px 10px rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 1.3s .5s cubic-bezier(.34,1.56,.64,1),opacity .6s .5s;z-index:1;transform:translateY(0)}
+.env-letter .lt{font-size:18px;color:#c0365f;letter-spacing:3px;line-height:1.8}
+.env-letter .ls{font-size:12px;color:#a84b6b;margin-top:4px;letter-spacing:2px}
+.env-seal{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) scale(1);width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff5c8a,#b8244f);display:flex;align-items:center;justify-content:center;color:#fffaf0;font-size:30px;box-shadow:0 6px 18px rgba(184,36,79,.5),inset 0 -4px 8px rgba(0,0,0,.2);cursor:pointer;z-index:4;transition:transform .4s,opacity .5s;animation:sealPulse 2s ease-in-out infinite}
+@keyframes sealPulse{0%,100%{box-shadow:0 6px 18px rgba(184,36,79,.5),inset 0 -4px 8px rgba(0,0,0,.2),0 0 0 0 rgba(229,68,122,.4)}50%{box-shadow:0 6px 18px rgba(184,36,79,.5),inset 0 -4px 8px rgba(0,0,0,.2),0 0 0 18px rgba(229,68,122,0)}}
+.env-seal:active{transform:translate(-50%,-50%) scale(.9)}
+.envelope-wrap.opened .env-seal{opacity:0;transform:translate(-50%,-50%) scale(0);pointer-events:none}
+.envelope-wrap.opened .env-flap{transform:rotateX(180deg)}
+.envelope-wrap.opened .env-letter{transform:translateY(-65%);box-shadow:0 20px 40px rgba(229,68,122,.4)}
+.cover-title{font-size:18px;color:#a84b6b;letter-spacing:5px;margin-bottom:14px;opacity:0;animation:fadeUp 1s .2s forwards}
+.cover-big{font-size:52px;color:#e5447a;letter-spacing:6px;line-height:1.2;margin-bottom:8px;text-shadow:0 4px 18px rgba(229,68,122,.25);opacity:0;animation:fadeUp 1s .5s forwards}
+.cover-hint{color:#c1527a;font-size:13px;letter-spacing:2px;margin-top:8px;opacity:0;animation:fadeUp 1s 1s forwards}
+.cover-hint.pulse{animation:fadeUp 1s 1s forwards,pulse 1.6s 2s infinite}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(-3px);opacity:.7}}
+
+/* ================= 2. 祝福 ================= */
+.screen-wish{background:linear-gradient(180deg,#ffe8f0 0%,#ffc9dd 100%)}
+.wish-card{width:100%;max-width:520px;padding:40px 26px;background:rgba(255,255,255,.8);border-radius:24px;box-shadow:0 18px 50px rgba(229,68,122,.18),inset 0 0 0 1px rgba(255,255,255,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:relative}
+.wish-card::before,.wish-card::after{content:"";position:absolute;width:42px;height:42px;background:radial-gradient(circle,#ffb3c6,transparent 70%);border-radius:50%;opacity:.8}
+.wish-card::before{top:-12px;left:-12px}
+.wish-card::after{bottom:-12px;right:-12px}
+.wish-emoji{font-size:42px;margin-bottom:16px;display:inline-block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.typewriter{font-size:28px;color:#c0365f;line-height:1.8;min-height:120px;letter-spacing:3px;word-break:keep-all;position:relative}
+.typewriter::after{content:"|";color:#e5447a;animation:blink .8s step-end infinite;margin-left:2px}
+.typewriter.done::after{display:none}
+@keyframes blink{50%{opacity:0}}
+.heart-beat{display:inline-block;color:#e5447a;animation:beat 1.2s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}25%{transform:scale(1.2)}50%{transform:scale(.95)}75%{transform:scale(1.15)}}
+.wish-sign{margin-top:22px;color:#a84b6b;font-size:14px;letter-spacing:4px;opacity:0;transition:opacity .8s ease .3s}
+.typewriter.done~.wish-sign{opacity:1}
+
+/* ================= 3. 翻牌优点 ================= */
+.screen-virtues{background:linear-gradient(180deg,#ffc9dd 0%,#ffd6e4 100%)}
+.virtues-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:420px;perspective:1000px}
+.flip-card{aspect-ratio:3/4;cursor:pointer;position:relative;transition:transform .3s;opacity:0;transform:translateY(24px);transition:opacity .8s,transform .8s cubic-bezier(.34,1.56,.64,1)}
+.flip-card.in{opacity:1;transform:translateY(0)}
+.flip-card:nth-child(1){transition-delay:.05s}
+.flip-card:nth-child(2){transition-delay:.2s}
+.flip-card:nth-child(3){transition-delay:.35s}
+.flip-card:nth-child(4){transition-delay:.5s}
+.flip-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.4,0,.2,1)}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(229,68,122,.15);background:rgba(255,255,255,.88);backdrop-filter:blur(8px)}
+.flip-front{border-top:4px solid var(--accent,#ff9a9e)}
+.flip-back{transform:rotateY(180deg);background:linear-gradient(135deg,var(--accent-l,#ffc9dd),var(--accent,#ff6b9e));color:#fff}
+.flip-icon{font-size:40px;margin-bottom:10px}
+.flip-title{font-size:17px;color:#c0365f;letter-spacing:1px;margin-bottom:6px;line-height:1.3}
+.flip-tap{font-size:11px;color:#a84b6b;opacity:.7;margin-top:auto;letter-spacing:2px}
+.flip-back .flip-title{color:#fff;font-size:16px}
+.flip-back p{font-size:13px;line-height:1.7;color:#fff;opacity:.95;letter-spacing:.5px}
+
+/* ================= 4. 互动时光轴 ================= */
+.screen-timeline{background:linear-gradient(180deg,#ffd6e4 0%,#fff0e6 100%)}
+.timeline{position:relative;max-width:480px;width:100%;padding:10px 0}
+.timeline::before{content:"";position:absolute;left:18px;top:0;width:3px;height:100%;background:linear-gradient(180deg,#ff9a9e,#e5447a,#ff9a9e);border-radius:3px}
+.tl-item{position:relative;padding:8px 0 8px 50px;opacity:0;transform:translateY(20px);transition:all .7s;text-align:left;margin-bottom:6px}
+.tl-item.in{opacity:1;transform:translateY(0)}
+.tl-dot{position:absolute;top:18px;left:6px;width:24px;height:24px;background:radial-gradient(circle,#ffcce0,#e5447a);border:4px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(229,68,122,.5);z-index:2;cursor:pointer;transition:transform .3s}
+.tl-item.open .tl-dot{transform:scale(1.15);box-shadow:0 0 16px rgba(229,68,122,.8)}
+.tl-head{display:flex;align-items:center;padding:14px 18px;background:rgba(255,255,255,.9);border-radius:14px;box-shadow:0 6px 20px rgba(229,68,122,.12);cursor:pointer;transition:all .3s;backdrop-filter:blur(6px)}
+.tl-head:active{transform:scale(.98)}
+.tl-head h4{font-size:18px;color:#e5447a;letter-spacing:2px;flex:1}
+.tl-head .arrow{color:#e5447a;transition:transform .4s;font-size:14px}
+.tl-item.open .arrow{transform:rotate(90deg)}
+.tl-body{max-height:0;overflow:hidden;transition:max-height .5s ease,padding .5s;padding:0 18px;margin-top:6px;background:rgba(255,255,255,.75);border-radius:12px;color:#5a2f40;line-height:1.9;font-size:14px;letter-spacing:.5px}
+.tl-item.open .tl-body{max-height:200px;padding:14px 18px}
+
+/* ================= 5. 爱心收集小游戏 ================= */
+.screen-game{background:linear-gradient(180deg,#fff0e6 0%,#ffe8f0 100%)}
+.game-area{position:relative;width:100%;max-width:360px;height:360px;margin:10px auto;background:rgba(255,255,255,.45);border-radius:22px;box-shadow:0 10px 30px rgba(229,68,122,.15),inset 0 0 0 1px rgba(255,255,255,.8);overflow:hidden;backdrop-filter:blur(8px)}
+.game-heart{position:absolute;font-size:30px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .2s;filter:drop-shadow(0 3px 6px rgba(229,68,122,.3))}
+.game-heart:active{transform:scale(.7)}
+.game-heart.popped{animation:heartPop .5s forwards}
+@keyframes heartPop{to{transform:scale(2);opacity:0}}
+.game-info{margin-top:18px;color:#a84b6b;font-size:14px;letter-spacing:2px}
+.game-count{color:#e5447a;font-weight:bold;font-size:18px}
+.game-done{display:none;padding:22px 20px;margin-top:18px;background:linear-gradient(135deg,#ff6b9e,#e5447a);color:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(229,68,122,.4);font-size:15px;letter-spacing:2px;line-height:1.8;max-width:380px;animation:fadeUp .6s}
+.game-done.show{display:block}
+
+/* ================= 6. 花束互动 ================= */
+.screen-flowers{background:linear-gradient(180deg,#ffe8f0 0%,#ffd6e4 100%)}
+.bouquet{position:relative;width:100%;max-width:380px;height:400px;margin:0 auto}
+.flower{position:absolute;width:90px;height:90px;cursor:pointer;transition:transform .4s cubic-bezier(.34,1.56,.64,1);-webkit-tap-highlight-color:transparent}
+.flower:active{transform:scale(.92) rotate(6deg)}
+.flower.bloom{animation:flowerBloom 1s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes flowerBloom{0%{transform:scale(0) rotate(-180deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.flower .petal{position:absolute;top:50%;left:50%;width:28px;height:42px;margin:-32px 0 0 -14px;background:linear-gradient(180deg,var(--pl,#ffb3c6) 0%,var(--p,#ff6b9e) 60%,var(--pd,#e5447a) 100%);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;box-shadow:inset 0 -6px 12px rgba(0,0,0,.1);transform-origin:center 32px;transform:rotate(var(--rot))}
+.flower .core{position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;background:radial-gradient(circle,#fff3b0,#f39c12);border-radius:50%;box-shadow:0 0 10px rgba(243,156,18,.5);z-index:3}
+.flower .stem{position:absolute;top:80%;left:50%;transform:translateX(-50%);width:4px;height:130px;background:linear-gradient(180deg,#5fa862,#3e7f41);border-radius:2px;z-index:-1}
+.flower .leaf{position:absolute;top:90%;left:50%;width:26px;height:14px;background:linear-gradient(135deg,#5fa862,#3e7f41);border-radius:0 100% 0 100%;transform-origin:top left;transform:rotate(35deg);z-index:-2}
+.flower .leaf.right{transform-origin:top right;transform:rotate(-35deg) translateX(14px);border-radius:100% 0 100% 0}
+.f1{top:0;left:50%;transform:translateX(-50%)}
+.f2{top:40px;left:12%}
+.f3{top:40px;right:12%}
+.f4{top:140px;left:5%}
+.f5{top:140px;right:5%}
+.vase{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:140px;height:110px;background:linear-gradient(180deg,#a5d8ff 0%,#74c0fc 60%,#4dabf7 100%);border-radius:20px 20px 40% 40%/10px 10px 55% 55%;box-shadow:inset -8px 0 18px rgba(0,0,0,.15),0 10px 20px rgba(0,0,0,.15)}
+.vase::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:150px;height:16px;background:linear-gradient(180deg,#74c0fc,#4dabf7);border-radius:50%;box-shadow:inset -6px 0 10px rgba(0,0,0,.1)}
+.flower-msg{margin-top:20px;min-height:40px;color:#c0365f;font-size:15px;letter-spacing:2px;font-weight:500;padding:10px 18px;background:rgba(255,255,255,.8);border-radius:20px;display:inline-block;opacity:0;transition:opacity .4s;line-height:1.6}
+.flower-msg.show{opacity:1;animation:fadeUp .5s}
+
+/* ================= 7. 签名 + 结尾 ================= */
+.screen-finale{background:
+  radial-gradient(ellipse at center,rgba(255,255,255,.5),transparent 70%),
+  linear-gradient(180deg,#ffd6e4 0%,#ffb6d1 100%);position:relative;overflow:hidden}
+.finale-flower{position:relative;width:180px;height:180px;margin-bottom:20px}
+.finale-flower .petal{position:absolute;top:50%;left:50%;width:56px;height:84px;margin:-64px 0 0 -28px;background:linear-gradient(180deg,#ffb3c6 0%,#ff6b9e 60%,#e5447a 100%);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;box-shadow:inset 0 -8px 16px rgba(192,54,95,.3);transform-origin:center 64px;opacity:0;transform:rotate(var(--rot)) scale(0);transition:all 1s cubic-bezier(.34,1.56,.64,1)}
+.finale-flower.bloom .petal{opacity:1;transform:rotate(var(--rot)) scale(1)}
+.finale-flower .p1{--rot:0deg;transition-delay:0s}
+.finale-flower .p2{--rot:45deg;transition-delay:.1s}
+.finale-flower .p3{--rot:90deg;transition-delay:.2s}
+.finale-flower .p4{--rot:135deg;transition-delay:.3s}
+.finale-flower .p5{--rot:180deg;transition-delay:.4s}
+.finale-flower .p6{--rot:225deg;transition-delay:.5s}
+.finale-flower .p7{--rot:270deg;transition-delay:.6s}
+.finale-flower .p8{--rot:315deg;transition-delay:.7s}
+.finale-flower .core{position:absolute;top:50%;left:50%;width:38px;height:38px;margin:-19px 0 0 -19px;background:radial-gradient(circle,#fff3b0,#f39c12);border-radius:50%;box-shadow:0 0 22px rgba(243,156,18,.65);opacity:0;transform:scale(0);transition:all .6s .9s cubic-bezier(.34,1.56,.64,1)}
+.finale-flower.bloom .core{opacity:1;transform:scale(1)}
+.finale-top{font-size:13px;letter-spacing:5px;color:#a84b6b;margin-bottom:10px}
+.finale-main{font-size:48px;color:#c0365f;text-shadow:0 4px 18px rgba(192,54,95,.3);margin-bottom:14px;letter-spacing:5px;line-height:1.3}
+.finale-sub{color:#6b3b4d;font-size:14px;letter-spacing:2px;margin-bottom:22px;max-width:90%;line-height:1.8}
+.signature-wrap{width:280px;max-width:80vw;height:88px;background:rgba(255,255,255,.7);border:2px dashed rgba(229,68,122,.5);border-radius:12px;margin-bottom:20px;position:relative;overflow:hidden}
+#sigCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.sig-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(229,68,122,.5);font-size:13px;letter-spacing:3px;pointer-events:none;transition:opacity .3s}
+.sig-hint.hide{opacity:0}
+.sig-clear{position:absolute;right:8px;top:8px;font-size:11px;color:#c1527a;background:rgba(255,255,255,.9);border:none;padding:4px 10px;border-radius:10px;cursor:pointer;letter-spacing:1px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ft-btn{padding:14px 26px;font-family:inherit;font-size:14px;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,#ff6b9e,#e5447a);border:none;border-radius:50px;box-shadow:0 8px 22px rgba(229,68,122,.4);cursor:pointer;transition:transform .2s;touch-action:manipulation}
+.ft-btn:active{transform:translateY(1px) scale(.96)}
+.ft-btn.alt{background:linear-gradient(135deg,#ffd54f,#ff9800);box-shadow:0 8px 22px rgba(255,152,0,.4)}
+.finale-sign{margin-top:26px;color:#a84b6b;font-size:13px;letter-spacing:3px;font-style:italic}
+
+/* ================= 浮层：飞出爱心/烟花 ================= */
+.fx-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
+.fx-heart{position:absolute;bottom:-40px;font-size:22px;user-select:none;animation:floatUp 3.4s ease-out forwards;will-change:transform,opacity}
+@keyframes floatUp{0%{transform:translateY(0) scale(.4) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(-110vh) scale(1.3) rotate(360deg);opacity:0}}
+.fx-firework{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;will-change:transform,opacity}
+
+/* ================= 弹窗 ================= */
+.toast{position:fixed;top:30px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(229,68,122,.95);color:#fff;padding:10px 20px;border-radius:50px;font-size:14px;letter-spacing:2px;box-shadow:0 6px 20px rgba(229,68,122,.4);z-index:10000;transition:transform .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ================= 响应式 ================= */
+@media (min-width:600px){
+  .section-title{font-size:52px;letter-spacing:6px}
+  .cover-big{font-size:72px;letter-spacing:10px}
+  .typewriter{font-size:36px;min-height:150px}
+  .virtues-grid{max-width:560px;gap:18px}
+  .finale-main{font-size:64px;letter-spacing:6px}
+  .envelope-wrap{width:360px}
+  .game-area{max-width:420px;height:420px}
+  .bouquet{max-width:480px;height:460px}
+}
+
+/* ================= 无障碍：减少动画 ================= */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .petal-item{display:none}
+}
+</style>
 </head>
 <body>
 
-  <!-- 飘落的花瓣背景 -->
-  <div class="petals" id="petals"></div>
+<canvas id="bgCanvas"></canvas>
+<div class="petals" id="petals"></div>
 
-  <!-- 第 1 屏：开场 · 礼物盒 -->
-  <section class="screen screen-intro" id="screen1">
-    <div class="intro-sub">李圳 · 写给妈妈的一封信</div>
-    <h1 class="intro-title">
-      <span>母</span><span>亲</span><span>节</span><span>快</span><span>乐</span>
-    </h1>
-    <p class="intro-hint">点击下方的礼物盒 ✨</p>
+<!-- 右侧章节导航 -->
+<nav class="nav-dots" id="navDots">
+  <button data-i="1" aria-label="封面"></button>
+  <button data-i="2" aria-label="祝福"></button>
+  <button data-i="3" aria-label="妈妈的样子"></button>
+  <button data-i="4" aria-label="时光记忆"></button>
+  <button data-i="5" aria-label="爱心游戏"></button>
+  <button data-i="6" aria-label="花束"></button>
+  <button data-i="7" aria-label="签名结尾"></button>
+</nav>
 
-    <div class="giftbox" id="giftbox" aria-label="点击打开礼物">
-      <div class="giftbox-lid">
-        <div class="giftbox-ribbon-v"></div>
-        <div class="giftbox-bow">
-          <div class="bow-l"></div>
-          <div class="bow-r"></div>
-          <div class="bow-c"></div>
-        </div>
+<!-- ============ 第 1 屏：封面信封 ============ -->
+<section class="screen screen-cover" id="s1">
+  <div class="cover-title">李圳 · 写给妈妈的一封信</div>
+  <h1 class="cover-big brush">母亲节快乐</h1>
+
+  <div class="envelope-wrap" id="envelope">
+    <div class="envelope">
+      <div class="env-back"></div>
+      <div class="env-body"></div>
+      <div class="env-letter">
+        <div class="lt brush">妈妈，</div>
+        <div class="lt brush">有些话写在这里</div>
+        <div class="ls">请向下滑动，慢慢看 ↓</div>
       </div>
-      <div class="giftbox-body">
-        <div class="giftbox-ribbon-v"></div>
-        <div class="giftbox-ribbon-h"></div>
-      </div>
-      <div class="giftbox-shadow"></div>
-      <div class="giftbox-hearts" id="giftHearts"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal" id="envSeal">❤</div>
     </div>
+  </div>
 
-    <div class="scroll-down" id="scrollDown">
-      <span>向下滚动 ↓</span>
-    </div>
-  </section>
+  <div class="cover-hint pulse" id="coverHint">点击上方红色印章 · 拆开这封信</div>
+  <div class="scroll-tip" id="scrollTip">向下滚动 ↓</div>
+</section>
 
-  <!-- 第 2 屏：最重要的话 -->
-  <section class="screen screen-message" id="screen2">
-    <div class="message-card">
-      <div class="message-deco">🌸</div>
-      <h2 class="typewriter" id="typewriter"></h2>
-      <p class="message-sign">—— 李圳</p>
-    </div>
-  </section>
+<!-- ============ 第 2 屏：祝福 ============ -->
+<section class="screen screen-wish" id="s2">
+  <div class="wish-card">
+    <div class="wish-emoji">🌸</div>
+    <h2 class="typewriter brush" id="typewriter"></h2>
+    <p class="wish-sign">—— 您的儿子 李圳</p>
+  </div>
+  <div class="scroll-tip">继续向下 ↓</div>
+</section>
 
-  <!-- 第 3 屏：妈妈的优点墙 -->
-  <section class="screen screen-virtues" id="screen3">
-    <h2 class="section-title">妈妈的样子</h2>
-    <p class="section-sub">在我心里，您是这样的</p>
-    <div class="virtues-grid">
-      <div class="virtue-card" data-color="1">
-        <div class="virtue-icon">🍲</div>
-        <h3>做饭超好吃</h3>
-        <p>世界上最好吃的味道，是妈妈厨房飘出的香气</p>
-      </div>
-      <div class="virtue-card" data-color="2">
-        <div class="virtue-icon">💗</div>
-        <h3>永远支持我，关心我</h3>
-        <p>无论我走多远，身后都有您温柔坚定的目光</p>
-      </div>
-      <div class="virtue-card" data-color="3">
-        <div class="virtue-icon">🌷</div>
-        <h3>永远把我放在第一位</h3>
-        <p>您总是先想到我的感受，再想到自己</p>
-      </div>
-      <div class="virtue-card" data-color="4">
-        <div class="virtue-icon">☎️</div>
-        <h3>情不自禁为我操心</h3>
-        <p>您的牵挂，是我走过千山万水的底气</p>
-      </div>
-    </div>
-  </section>
+<!-- ============ 第 3 屏：翻牌优点 ============ -->
+<section class="screen screen-virtues" id="s3">
+  <h2 class="section-title brush">妈妈的样子</h2>
+  <p class="section-sub">点击每张卡片，看看背后的心里话</p>
 
-  <!-- 第 4 屏：时光 · 感谢 -->
-  <section class="screen screen-timeline" id="screen4">
-    <h2 class="section-title">谢谢您，妈妈</h2>
-    <p class="section-sub">有些话平时说不出口，今天都写在这里</p>
-    <div class="timeline">
-      <div class="timeline-item left">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-          <h4>小时候</h4>
-          <p>是您一口一口喂我长大，一步一步教我走路，把最好的都留给了我。</p>
+  <div class="virtues-grid">
+    <div class="flip-card" style="--accent:#ff9a9e;--accent-l:#ffc5c8">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-icon">🍲</div>
+          <div class="flip-title brush">做饭超好吃</div>
+          <div class="flip-tap">点我 ↺</div>
         </div>
-      </div>
-      <div class="timeline-item right">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-          <h4>读书时</h4>
-          <p>深夜的那盏灯，清晨热腾腾的早饭，还有您悄悄塞给我的零花钱。</p>
-        </div>
-      </div>
-      <div class="timeline-item left">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-          <h4>长大后</h4>
-          <p>我慢慢走向远方，而您总在电话那头说：吃饱穿暖，别太累。</p>
-        </div>
-      </div>
-      <div class="timeline-item right">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-          <h4>现在</h4>
-          <p>轮到我来疼您了。想您了，妈妈，这辈子做您的孩子，真好。</p>
+        <div class="flip-back">
+          <div class="flip-title brush">人间烟火</div>
+          <p>世界上最好吃的味道，是妈妈厨房飘出的香气。您的每一道家常菜，都是我走到哪里都忘不了的乡愁。</p>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- 第 5 屏：结尾 · 康乃馨绽放 -->
-  <section class="screen screen-finale" id="screen5">
-    <div class="finale-flower" id="finaleFlower">
-      <div class="petal p1"></div>
-      <div class="petal p2"></div>
-      <div class="petal p3"></div>
-      <div class="petal p4"></div>
-      <div class="petal p5"></div>
-      <div class="petal p6"></div>
-      <div class="petal p7"></div>
-      <div class="petal p8"></div>
-      <div class="flower-core"></div>
+    <div class="flip-card" style="--accent:#ff6b9e;--accent-l:#ffb3c6">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-icon">💗</div>
+          <div class="flip-title brush">永远支持我</div>
+          <div class="flip-tap">点我 ↺</div>
+        </div>
+        <div class="flip-back">
+          <div class="flip-title brush">坚定的后盾</div>
+          <p>无论我选什么路、犯过多少错，您都说"没关系，有妈呢"。您让我一直有勇气，去做想做的事。</p>
+        </div>
+      </div>
     </div>
-    <h2 class="finale-title">献给世界上最好的妈妈</h2>
-    <h1 class="finale-main">妈妈，我爱你 ❤</h1>
-    <p class="finale-sub">愿您被岁月温柔以待，愿您永远健康、开心。</p>
-    <button class="heart-btn" id="heartBtn">
-      <span>❤ 送妈妈一颗爱心</span>
-    </button>
-    <p class="finale-sign">—— 您的儿子 李圳 敬上 · 母亲节</p>
-  </section>
+    <div class="flip-card" style="--accent:#e5447a;--accent-l:#ff9ab8">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-icon">🌷</div>
+          <div class="flip-title brush">总把我放第一</div>
+          <div class="flip-tap">点我 ↺</div>
+        </div>
+        <div class="flip-back">
+          <div class="flip-title brush">最温柔的偏心</div>
+          <p>家里最大的那份永远留给我，好吃的永远说"我不爱吃"。您偏心了一辈子，把自己放到了最后。</p>
+        </div>
+      </div>
+    </div>
+    <div class="flip-card" style="--accent:#ffb347;--accent-l:#ffd88a">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-icon">☎️</div>
+          <div class="flip-title brush">情不自禁为我操心</div>
+          <div class="flip-tap">点我 ↺</div>
+        </div>
+        <div class="flip-back">
+          <div class="flip-title brush">永远的牵挂</div>
+          <p>天冷加衣、吃饭别凑合、晚上早点睡——那些唠叨、那些电话，原来都是这世界上最珍贵的挂念。</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <div class="hearts-layer" id="heartsLayer"></div>
+  <div class="scroll-tip">继续向下 ↓</div>
+</section>
 
-  <script src="script.js"></script>
+<!-- ============ 第 4 屏：互动时光轴 ============ -->
+<section class="screen screen-timeline" id="s4">
+  <h2 class="section-title brush">我们的时光</h2>
+  <p class="section-sub">点击每一段回忆，慢慢展开</p>
+
+  <div class="timeline" id="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <h4 class="brush">小时候 · 一口一口</h4>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="tl-body">
+        是您一口一口喂我长大，一步一步教我走路。那时候觉得您的手掌好大，抱起我轻而易举。您把最好的都留给了我，自己总吃剩下的。
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <h4 class="brush">生病的夜晚</h4>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="tl-body">
+        每次我生病，您都是守在床边的那个人。凌晨三点的额头温度、温水、药片⋯⋯您说"没事，妈在"。那句话，胜过世间所有解药。
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <h4 class="brush">读书时 · 那盏灯</h4>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="tl-body">
+        深夜学习时客厅总留着一盏灯，早上总有热腾腾的饭。您悄悄塞进我书包里的零花钱、运动鞋、削好的苹果——您爱得很安静，很克制。
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <h4 class="brush">离家远行</h4>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="tl-body">
+        我慢慢走向远方。火车站、机场、小区门口⋯⋯每一次您目送我走，我都没敢回头——因为回头，您会哭，我也会。
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <h4 class="brush">电话那头</h4>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="tl-body">
+        您在电话那头，永远是那三句话：吃饱穿暖、别太累、想你了。我每次都说"妈，我挺好的"——其实有时候真的很累，但听到您声音就没事了。
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <h4 class="brush">现在 · 我来了</h4>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="tl-body">
+        以后就轮到我照顾您啦。陪您看病、陪您散步、陪您做您年轻时没来得及做的事。这辈子做您的孩子，真的真的很幸福。
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-tip">继续向下 ↓</div>
+</section>
+
+<!-- ============ 第 5 屏：爱心收集小游戏 ============ -->
+<section class="screen screen-game" id="s5">
+  <h2 class="section-title brush">收集我的爱</h2>
+  <p class="section-sub">点破所有爱心，送给妈妈</p>
+
+  <div class="game-area" id="gameArea"></div>
+
+  <div class="game-info">
+    已收集 <span class="game-count" id="gameCount">0</span> / <span id="gameTotal">10</span> 颗爱心
+  </div>
+
+  <div class="game-done" id="gameDone">
+    ✨ 全都收集到了！ ✨<br>
+    这里面装的<br>
+    是我这辈子对您说过的<br>
+    和没说出口的"我爱你"
+  </div>
+
+  <div class="scroll-tip">继续向下 ↓</div>
+</section>
+
+<!-- ============ 第 6 屏：花束 ============ -->
+<section class="screen screen-flowers" id="s6">
+  <h2 class="section-title brush">一束花给您</h2>
+  <p class="section-sub">点击每一朵，看看它在说什么</p>
+
+  <div class="bouquet" id="bouquet">
+    <div class="flower f1" data-msg="您永远健康❤️" style="--p:#ff6b9e;--pl:#ffb3c6;--pd:#e5447a">
+      <div class="petal" style="--rot:0deg"></div><div class="petal" style="--rot:45deg"></div>
+      <div class="petal" style="--rot:90deg"></div><div class="petal" style="--rot:135deg"></div>
+      <div class="petal" style="--rot:180deg"></div><div class="petal" style="--rot:225deg"></div>
+      <div class="petal" style="--rot:270deg"></div><div class="petal" style="--rot:315deg"></div>
+      <div class="core"></div><div class="stem"></div><div class="leaf"></div><div class="leaf right"></div>
+    </div>
+    <div class="flower f2" data-msg="愿您被岁月温柔以待" style="--p:#ff82ad;--pl:#ffc9dd;--pd:#d63a6f">
+      <div class="petal" style="--rot:0deg"></div><div class="petal" style="--rot:45deg"></div>
+      <div class="petal" style="--rot:90deg"></div><div class="petal" style="--rot:135deg"></div>
+      <div class="petal" style="--rot:180deg"></div><div class="petal" style="--rot:225deg"></div>
+      <div class="petal" style="--rot:270deg"></div><div class="petal" style="--rot:315deg"></div>
+      <div class="core"></div><div class="stem"></div><div class="leaf"></div><div class="leaf right"></div>
+    </div>
+    <div class="flower f3" data-msg="辛苦了，妈妈 ♡" style="--p:#ffa0c4;--pl:#ffd0e0;--pd:#e0578f">
+      <div class="petal" style="--rot:0deg"></div><div class="petal" style="--rot:45deg"></div>
+      <div class="petal" style="--rot:90deg"></div><div class="petal" style="--rot:135deg"></div>
+      <div class="petal" style="--rot:180deg"></div><div class="petal" style="--rot:225deg"></div>
+      <div class="petal" style="--rot:270deg"></div><div class="petal" style="--rot:315deg"></div>
+      <div class="core"></div><div class="stem"></div><div class="leaf"></div><div class="leaf right"></div>
+    </div>
+    <div class="flower f4" data-msg="做您儿子真好" style="--p:#ff5c8a;--pl:#ff9ab8;--pd:#c0265c">
+      <div class="petal" style="--rot:0deg"></div><div class="petal" style="--rot:45deg"></div>
+      <div class="petal" style="--rot:90deg"></div><div class="petal" style="--rot:135deg"></div>
+      <div class="petal" style="--rot:180deg"></div><div class="petal" style="--rot:225deg"></div>
+      <div class="petal" style="--rot:270deg"></div><div class="petal" style="--rot:315deg"></div>
+      <div class="core"></div><div class="stem"></div><div class="leaf"></div><div class="leaf right"></div>
+    </div>
+    <div class="flower f5" data-msg="下辈子还做您的孩子" style="--p:#ff7a9f;--pl:#ffb8cd;--pd:#d13671">
+      <div class="petal" style="--rot:0deg"></div><div class="petal" style="--rot:45deg"></div>
+      <div class="petal" style="--rot:90deg"></div><div class="petal" style="--rot:135deg"></div>
+      <div class="petal" style="--rot:180deg"></div><div class="petal" style="--rot:225deg"></div>
+      <div class="petal" style="--rot:270deg"></div><div class="petal" style="--rot:315deg"></div>
+      <div class="core"></div><div class="stem"></div><div class="leaf"></div><div class="leaf right"></div>
+    </div>
+    <div class="vase"></div>
+  </div>
+
+  <div class="flower-msg" id="flowerMsg">— 每一朵都有一句话 —</div>
+  <div class="scroll-tip">最后一页啦 ↓</div>
+</section>
+
+<!-- ============ 第 7 屏：签名 + 结尾 ============ -->
+<section class="screen screen-finale" id="s7">
+  <div class="finale-flower" id="finaleFlower">
+    <div class="petal p1"></div><div class="petal p2"></div><div class="petal p3"></div><div class="petal p4"></div>
+    <div class="petal p5"></div><div class="petal p6"></div><div class="petal p7"></div><div class="petal p8"></div>
+    <div class="core"></div>
+  </div>
+
+  <div class="finale-top">献给世界上最好的妈妈</div>
+  <h1 class="finale-main brush">妈妈，我爱你 ❤</h1>
+  <p class="finale-sub">愿您被岁月温柔以待<br>愿您健康、开心，永远幸福</p>
+
+  <p class="finale-sub" style="margin-bottom:10px;font-size:13px">想在这里给妈妈签个名 ✍️</p>
+  <div class="signature-wrap">
+    <canvas id="sigCanvas"></canvas>
+    <div class="sig-hint" id="sigHint">在此签名 · 手指滑动</div>
+    <button class="sig-clear" id="sigClear">清除</button>
+  </div>
+
+  <div class="btns">
+    <button class="ft-btn" id="heartBtn">❤ 送出爱心</button>
+    <button class="ft-btn alt" id="fireworkBtn">🎆 放烟花</button>
+  </div>
+
+  <p class="finale-sign">—— 您的儿子 李圳 敬上 · 母亲节</p>
+</section>
+
+<div class="fx-layer" id="fxLayer"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 工具 ============ */
+var isMobile = window.innerWidth < 600;
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* ============ 背景粒子 canvas ============ */
+(function bgCanvas(){
+  var c = document.getElementById('bgCanvas');
+  var ctx = c.getContext('2d');
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var N = isMobile ? 30 : 60;
+  var dots = [];
+  for (var i = 0; i < N; i++) {
+    dots.push({
+      x: Math.random()*c.width,
+      y: Math.random()*c.height,
+      r: Math.random()*2+.5,
+      vx: (Math.random()-.5)*.3,
+      vy: (Math.random()-.5)*.3,
+      a: Math.random()*.4+.2
+    });
+  }
+  function tick(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for (var i = 0; i < dots.length; i++) {
+      var d = dots[i];
+      d.x += d.vx; d.y += d.vy;
+      if (d.x < 0) d.x = c.width; if (d.x > c.width) d.x = 0;
+      if (d.y < 0) d.y = c.height; if (d.y > c.height) d.y = 0;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(229,68,122,' + d.a + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ============ 飘落花瓣 ============ */
+(function petals(){
+  var c = document.getElementById('petals');
+  var N = isMobile ? 14 : 24;
+  for (var i = 0; i < N; i++) {
+    var p = document.createElement('div');
+    p.className = 'petal-item';
+    var s = 10 + Math.random()*18;
+    p.style.width = s+'px'; p.style.height = s+'px';
+    p.style.left = Math.random()*100+'vw';
+    p.style.animationDuration = (8+Math.random()*10)+'s';
+    p.style.animationDelay = (-Math.random()*15)+'s';
+    p.style.opacity = .4 + Math.random()*.4;
+    var h = 330+Math.random()*30;
+    p.style.background = 'radial-gradient(circle at 30% 30%, hsl('+h+',100%,85%), hsl('+h+',70%,65%) 70%, hsl('+h+',60%,50%))';
+    c.appendChild(p);
+  }
+})();
+
+/* ============ 章节导航 ============ */
+(function nav(){
+  var btns = document.querySelectorAll('.nav-dots button');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var i = b.getAttribute('data-i');
+      document.getElementById('s'+i).scrollIntoView({behavior:'smooth'});
+    });
+  });
+  var screens = document.querySelectorAll('.screen');
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){
+        var i = e.target.id.replace('s','');
+        btns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-i')===i); });
+      }
+    });
+  }, {threshold:.5});
+  screens.forEach(function(s){ ob.observe(s); });
+  document.querySelectorAll('.scroll-tip').forEach(function(el, i){
+    el.addEventListener('click', function(){
+      var nxt = document.getElementById('s'+(i+2));
+      if (nxt) nxt.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+
+/* ============ 1. 信封点击打开 ============ */
+(function envelope(){
+  var wrap = document.getElementById('envelope');
+  var seal = document.getElementById('envSeal');
+  var hint = document.getElementById('coverHint');
+  var opened = false;
+  function open(){
+    if (opened) return;
+    opened = true;
+    wrap.classList.add('opened');
+    hint.textContent = '✨ 已拆开 · 继续向下滑看惊喜 ✨';
+    hint.classList.remove('pulse');
+    // 飞出小爱心
+    var layer = document.getElementById('fxLayer');
+    for (var i = 0; i < 12; i++) {
+      (function(i){
+        setTimeout(function(){
+          var h = document.createElement('span');
+          h.className = 'fx-heart';
+          h.textContent = ['❤','💕','💖','🌸','✨'][i%5];
+          h.style.left = (30 + Math.random()*40)+'%';
+          h.style.fontSize = (16+Math.random()*18)+'px';
+          h.style.animationDuration = (2+Math.random()*1.5)+'s';
+          layer.appendChild(h);
+          setTimeout(function(){h.remove();}, 4000);
+        }, i*80);
+      })(i);
+    }
+    setTimeout(function(){
+      document.getElementById('s2').scrollIntoView({behavior:'smooth'});
+    }, 1600);
+  }
+  seal.addEventListener('click', open);
+  wrap.addEventListener('click', function(e){
+    if (e.target !== seal && !opened) {
+      // 第一次点非印章 → 提示
+      toast('点红色印章打开 ❤');
+    }
+  });
+})();
+
+/* ============ 2. 打字机 ============ */
+(function typewriter(){
+  var el = document.getElementById('typewriter');
+  var text = '献给世界上最好的妈妈，\n妈妈我爱你 ❤';
+  var started = false;
+  function start(){
+    if (started) return; started = true;
+    var i = 0;
+    var t = setInterval(function(){
+      var ch = text[i];
+      if (ch === '\n') el.innerHTML += '<br>';
+      else if (ch === '❤') el.innerHTML += '<span class="heart-beat">❤</span>';
+      else el.innerHTML += ch;
+      i++;
+      if (i >= text.length){ clearInterval(t); el.classList.add('done'); }
+    }, 180);
+  }
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting) start(); });
+  }, {threshold:.4});
+  ob.observe(document.getElementById('s2'));
+})();
+
+/* ============ 3. 翻牌 ============ */
+(function flip(){
+  var cards = document.querySelectorAll('.flip-card');
+  cards.forEach(function(c){
+    c.addEventListener('click', function(){
+      c.classList.toggle('flipped');
+    });
+  });
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){
+        cards.forEach(function(c){ c.classList.add('in'); });
+        ob.disconnect();
+      }
+    });
+  }, {threshold:.2});
+  ob.observe(document.getElementById('s3'));
+})();
+
+/* ============ 4. 时光轴展开 ============ */
+(function timeline(){
+  var items = document.querySelectorAll('.tl-item');
+  items.forEach(function(it){
+    var head = it.querySelector('.tl-head');
+    head.addEventListener('click', function(){ it.classList.toggle('open'); });
+  });
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('in'); ob.unobserve(e.target); }
+    });
+  }, {threshold:.15});
+  items.forEach(function(i){ ob.observe(i); });
+})();
+
+/* ============ 5. 爱心收集游戏 ============ */
+(function game(){
+  var area = document.getElementById('gameArea');
+  var countEl = document.getElementById('gameCount');
+  var doneEl = document.getElementById('gameDone');
+  var TOTAL = 10;
+  var count = 0;
+  var spawned = false;
+  var emojis = ['❤','💕','💖','💗','💓','💝','💞','🌸','🌷','✨'];
+
+  function spawn(){
+    if (spawned) return; spawned = true;
+    var rect = area.getBoundingClientRect();
+    for (var i = 0; i < TOTAL; i++) {
+      (function(i){
+        setTimeout(function(){
+          var h = document.createElement('div');
+          h.className = 'game-heart';
+          h.textContent = emojis[i];
+          var x = 20 + Math.random() * (rect.width - 60);
+          var y = 20 + Math.random() * (rect.height - 60);
+          h.style.left = x+'px';
+          h.style.top = y+'px';
+          // 漂浮动画
+          var dur = 3+Math.random()*2;
+          h.style.animation = 'float '+dur+'s ease-in-out infinite';
+          h.style.animationDelay = (Math.random()*2)+'s';
+          h.addEventListener('click', function(){
+            if (h.classList.contains('popped')) return;
+            h.classList.add('popped');
+            count++;
+            countEl.textContent = count;
+            // 爆出小爱心
+            var layer = document.getElementById('fxLayer');
+            var rc = h.getBoundingClientRect();
+            for (var j = 0; j < 5; j++){
+              var s = document.createElement('span');
+              s.className = 'fx-heart';
+              s.textContent = '❤';
+              s.style.left = rc.left+'px';
+              s.style.top = rc.top+'px';
+              s.style.bottom = 'auto';
+              s.style.position = 'fixed';
+              s.style.fontSize = '14px';
+              s.style.animation = 'floatUp 1.5s ease-out forwards';
+              document.getElementById('fxLayer').appendChild(s);
+              (function(s){ setTimeout(function(){s.remove();},1800); })(s);
+            }
+            setTimeout(function(){ h.remove(); }, 500);
+            if (count >= TOTAL){
+              setTimeout(function(){
+                doneEl.classList.add('show');
+                // 同时放一波
+                for (var k = 0; k < 20; k++){
+                  (function(k){
+                    setTimeout(function(){
+                      var hh = document.createElement('span');
+                      hh.className = 'fx-heart';
+                      hh.textContent = emojis[k%emojis.length];
+                      hh.style.left = Math.random()*100+'vw';
+                      hh.style.fontSize = (18+Math.random()*22)+'px';
+                      document.getElementById('fxLayer').appendChild(hh);
+                      setTimeout(function(){hh.remove();},4500);
+                    }, k*80);
+                  })(k);
+                }
+              }, 400);
+            }
+          });
+          area.appendChild(h);
+        }, i*150);
+      })(i);
+    }
+  }
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting) spawn(); });
+  }, {threshold:.3});
+  ob.observe(document.getElementById('s5'));
+})();
+
+/* ============ 6. 花束 ============ */
+(function bouquet(){
+  var flowers = document.querySelectorAll('.flower');
+  var msg = document.getElementById('flowerMsg');
+  flowers.forEach(function(f){
+    f.addEventListener('click', function(){
+      msg.textContent = f.getAttribute('data-msg');
+      msg.classList.remove('show');
+      setTimeout(function(){ msg.classList.add('show'); }, 10);
+      // 小爱心
+      var layer = document.getElementById('fxLayer');
+      var rc = f.getBoundingClientRect();
+      for (var j = 0; j < 4; j++){
+        var s = document.createElement('span');
+        s.className = 'fx-heart';
+        s.textContent = '❤';
+        s.style.left = (rc.left + rc.width/2 + (Math.random()-.5)*40)+'px';
+        s.style.top = (rc.top + rc.height/2)+'px';
+        s.style.bottom = 'auto';
+        s.style.position = 'fixed';
+        s.style.fontSize = '14px';
+        s.style.animation = 'floatUp 1.5s ease-out forwards';
+        layer.appendChild(s);
+        (function(s){ setTimeout(function(){s.remove();},1800); })(s);
+      }
+    });
+  });
+  var spawned = false;
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting && !spawned){
+        spawned = true;
+        flowers.forEach(function(f, i){
+          setTimeout(function(){ f.classList.add('bloom'); }, i*250);
+        });
+      }
+    });
+  }, {threshold:.3});
+  ob.observe(document.getElementById('s6'));
+})();
+
+/* ============ 7. 结尾花朵绽放 + 签名 ============ */
+(function finale(){
+  var fl = document.getElementById('finaleFlower');
+  var ob = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ fl.classList.add('bloom'); ob.disconnect(); } });
+  }, {threshold:.4});
+  ob.observe(fl);
+
+  // 签名
+  var c = document.getElementById('sigCanvas');
+  var hint = document.getElementById('sigHint');
+  var clearBtn = document.getElementById('sigClear');
+  var ctx = c.getContext('2d');
+  function setupCanvas(){
+    var r = c.getBoundingClientRect();
+    c.width = r.width * (window.devicePixelRatio||1);
+    c.height = r.height * (window.devicePixelRatio||1);
+    ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#c0365f';
+  }
+  setupCanvas();
+  window.addEventListener('resize', function(){
+    // 保留内容复杂，这里简单重设
+    ctx.clearRect(0,0,c.width,c.height);
+    setupCanvas();
+  });
+
+  var drawing = false;
+  function getPos(e){
+    var r = c.getBoundingClientRect();
+    var t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+  function start(e){
+    e.preventDefault();
+    drawing = true;
+    hint.classList.add('hide');
+    var p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+  function move(e){
+    if (!drawing) return;
+    e.preventDefault();
+    var p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  }
+  function end(){ drawing = false; }
+  c.addEventListener('mousedown', start);
+  c.addEventListener('mousemove', move);
+  c.addEventListener('mouseup', end);
+  c.addEventListener('mouseleave', end);
+  c.addEventListener('touchstart', start, {passive:false});
+  c.addEventListener('touchmove', move, {passive:false});
+  c.addEventListener('touchend', end);
+
+  clearBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    ctx.clearRect(0,0,c.width,c.height);
+    hint.classList.remove('hide');
+  });
+
+  // 送爱心
+  document.getElementById('heartBtn').addEventListener('click', function(){
+    var layer = document.getElementById('fxLayer');
+    var emojis = ['❤','💕','💖','💗','💓','🌸','🌷','✨'];
+    var C = isMobile ? 30 : 50;
+    for (var i = 0; i < C; i++){
+      (function(i){
+        setTimeout(function(){
+          var h = document.createElement('span');
+          h.className = 'fx-heart';
+          h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+          h.style.left = Math.random()*100+'vw';
+          h.style.fontSize = (18+Math.random()*24)+'px';
+          h.style.animationDuration = (2.5+Math.random()*2)+'s';
+          layer.appendChild(h);
+          setTimeout(function(){h.remove();},5000);
+        }, i*60);
+      })(i);
+    }
+    toast('💖 爱心已送达妈妈 💖');
+  });
+
+  // 烟花
+  document.getElementById('fireworkBtn').addEventListener('click', function(){
+    fireworks();
+  });
+})();
+
+/* ============ 烟花（点击屏幕也可以放） ============ */
+function fireworks(x, y){
+  var layer = document.getElementById('fxLayer');
+  if (typeof x !== 'number') x = window.innerWidth/2;
+  if (typeof y !== 'number') y = window.innerHeight/2 + (Math.random()-.5)*100;
+  var colors = ['#ff6b9e','#e5447a','#ffb347','#f9c6d9','#fff3b0','#ffa0c4'];
+  var N = 24;
+  for (var i = 0; i < N; i++){
+    var dot = document.createElement('div');
+    dot.className = 'fx-firework';
+    dot.style.left = x+'px';
+    dot.style.top = y+'px';
+    dot.style.background = colors[Math.floor(Math.random()*colors.length)];
+    dot.style.boxShadow = '0 0 8px currentColor';
+    layer.appendChild(dot);
+    var angle = (Math.PI*2*i)/N + Math.random()*.2;
+    var dist = 80 + Math.random()*80;
+    var dx = Math.cos(angle)*dist;
+    var dy = Math.sin(angle)*dist;
+    (function(dot,dx,dy){
+      requestAnimationFrame(function(){
+        dot.style.transition = 'transform 1.2s cubic-bezier(.22,1,.36,1), opacity 1.2s';
+        dot.style.transform = 'translate('+dx+'px,'+dy+'px) scale(.5)';
+        dot.style.opacity = '0';
+      });
+      setTimeout(function(){ dot.remove(); }, 1400);
+    })(dot,dx,dy);
+  }
+}
+
+/* 最后一屏点击屏幕放烟花 */
+document.getElementById('s7').addEventListener('click', function(e){
+  // 避免按钮触发
+  var tag = e.target.tagName;
+  if (tag==='BUTTON' || tag==='CANVAS' || e.target.closest('.signature-wrap') || e.target.closest('.btns')) return;
+  fireworks(e.clientX, e.clientY);
+});
+
+</script>
 </body>
 </html>
