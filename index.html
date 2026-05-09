@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#e5447a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>献给世界上最好的妈妈 · 母亲节快乐</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 飘落的花瓣背景 -->
+  <div class="petals" id="petals"></div>
+
+  <!-- 第 1 屏：开场 · 礼物盒 -->
+  <section class="screen screen-intro" id="screen1">
+    <div class="intro-sub">李圳 · 写给妈妈的一封信</div>
+    <h1 class="intro-title">
+      <span>母</span><span>亲</span><span>节</span><span>快</span><span>乐</span>
+    </h1>
+    <p class="intro-hint">点击下方的礼物盒 ✨</p>
+
+    <div class="giftbox" id="giftbox" aria-label="点击打开礼物">
+      <div class="giftbox-lid">
+        <div class="giftbox-ribbon-v"></div>
+        <div class="giftbox-bow">
+          <div class="bow-l"></div>
+          <div class="bow-r"></div>
+          <div class="bow-c"></div>
+        </div>
+      </div>
+      <div class="giftbox-body">
+        <div class="giftbox-ribbon-v"></div>
+        <div class="giftbox-ribbon-h"></div>
+      </div>
+      <div class="giftbox-shadow"></div>
+      <div class="giftbox-hearts" id="giftHearts"></div>
+    </div>
+
+    <div class="scroll-down" id="scrollDown">
+      <span>向下滚动 ↓</span>
+    </div>
+  </section>
+
+  <!-- 第 2 屏：最重要的话 -->
+  <section class="screen screen-message" id="screen2">
+    <div class="message-card">
+      <div class="message-deco">🌸</div>
+      <h2 class="typewriter" id="typewriter"></h2>
+      <p class="message-sign">—— 李圳</p>
+    </div>
+  </section>
+
+  <!-- 第 3 屏：妈妈的优点墙 -->
+  <section class="screen screen-virtues" id="screen3">
+    <h2 class="section-title">妈妈的样子</h2>
+    <p class="section-sub">在我心里，您是这样的</p>
+    <div class="virtues-grid">
+      <div class="virtue-card" data-color="1">
+        <div class="virtue-icon">🍲</div>
+        <h3>做饭超好吃</h3>
+        <p>世界上最好吃的味道，是妈妈厨房飘出的香气</p>
+      </div>
+      <div class="virtue-card" data-color="2">
+        <div class="virtue-icon">💗</div>
+        <h3>永远支持我，关心我</h3>
+        <p>无论我走多远，身后都有您温柔坚定的目光</p>
+      </div>
+      <div class="virtue-card" data-color="3">
+        <div class="virtue-icon">🌷</div>
+        <h3>永远把我放在第一位</h3>
+        <p>您总是先想到我的感受，再想到自己</p>
+      </div>
+      <div class="virtue-card" data-color="4">
+        <div class="virtue-icon">☎️</div>
+        <h3>情不自禁为我操心</h3>
+        <p>您的牵挂，是我走过千山万水的底气</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第 4 屏：时光 · 感谢 -->
+  <section class="screen screen-timeline" id="screen4">
+    <h2 class="section-title">谢谢您，妈妈</h2>
+    <p class="section-sub">有些话平时说不出口，今天都写在这里</p>
+    <div class="timeline">
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h4>小时候</h4>
+          <p>是您一口一口喂我长大，一步一步教我走路，把最好的都留给了我。</p>
+        </div>
+      </div>
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h4>读书时</h4>
+          <p>深夜的那盏灯，清晨热腾腾的早饭，还有您悄悄塞给我的零花钱。</p>
+        </div>
+      </div>
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h4>长大后</h4>
+          <p>我慢慢走向远方，而您总在电话那头说：吃饱穿暖，别太累。</p>
+        </div>
+      </div>
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h4>现在</h4>
+          <p>轮到我来疼您了。想您了，妈妈，这辈子做您的孩子，真好。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第 5 屏：结尾 · 康乃馨绽放 -->
+  <section class="screen screen-finale" id="screen5">
+    <div class="finale-flower" id="finaleFlower">
+      <div class="petal p1"></div>
+      <div class="petal p2"></div>
+      <div class="petal p3"></div>
+      <div class="petal p4"></div>
+      <div class="petal p5"></div>
+      <div class="petal p6"></div>
+      <div class="petal p7"></div>
+      <div class="petal p8"></div>
+      <div class="flower-core"></div>
+    </div>
+    <h2 class="finale-title">献给世界上最好的妈妈</h2>
+    <h1 class="finale-main">妈妈，我爱你 ❤</h1>
+    <p class="finale-sub">愿您被岁月温柔以待，愿您永远健康、开心。</p>
+    <button class="heart-btn" id="heartBtn">
+      <span>❤ 送妈妈一颗爱心</span>
+    </button>
+    <p class="finale-sign">—— 您的儿子 李圳 敬上 · 母亲节</p>
+  </section>
+
+  <div class="hearts-layer" id="heartsLayer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
