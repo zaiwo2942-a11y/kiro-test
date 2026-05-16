@@ -400,12 +400,39 @@ section{
 
 </main>
 
-<!-- Libraries: three + gsap + ScrollTrigger via CDN (no build step) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
+<!-- Libraries: gsap via cdnjs (UMD), three.js via unpkg (ES module shim into window) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+  // expose THREE on window so the legacy IIFE below can use it
+  import * as THREE from 'three';
+  window.THREE = THREE;
+  window.dispatchEvent(new Event('three-ready'));
+</script>
 
 <script>
+// Wait for THREE to be loaded (module scripts run after classic ones)
+function bootWhenReady(fn){
+  if (window.THREE) return fn();
+  window.addEventListener('three-ready', fn, { once:true });
+  // safety timeout: if three never loads, at least kill the preloader so the page is readable
+  setTimeout(() => {
+    if (!window.THREE){
+      const pl = document.getElementById('preloader');
+      if (pl){
+        pl.innerHTML = '<div class="pl-inner"><div class="pl-text">three.js failed to load — check your network.<br><small style="opacity:.6">Try a hard refresh.</small></div></div>';
+      }
+    }
+  }, 8000);
+}
+bootWhenReady(() => {
 /* =========================================================
  *  Storytelling-style demo
  *  - Three.js phoenix made of GPU points (~12k particles)
@@ -836,6 +863,7 @@ section{
   });
 
 })();
+}); // end bootWhenReady
 </script>
 
 </body>
