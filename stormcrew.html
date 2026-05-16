@@ -27,6 +27,10 @@ svg{display:block}
 .sticky{position:sticky;top:0;height:100vh;overflow:hidden}
 
 .section{position:absolute;inset:0;overflow:hidden;opacity:0;visibility:hidden;will-change:opacity}
+.section.s-hero{opacity:1;visibility:visible}
+.scroll-hint{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%);font-family:var(--font-display);font-size:.7rem;letter-spacing:.5em;text-transform:uppercase;color:var(--grey-light);z-index:1000;pointer-events:none;animation:bobby 2s ease-in-out infinite;text-align:center}
+.scroll-hint::after{content:"";display:block;width:1px;height:30px;background:var(--grey-light);margin:.6rem auto 0;opacity:.6}
+@keyframes bobby{0%,100%{transform:translate(-50%,0);opacity:.7}50%{transform:translate(-50%,8px);opacity:1}}
 
 /* ============== 1. HERO ============== */
 .s-hero{background:var(--black)}
@@ -133,6 +137,7 @@ svg{display:block}
 </head>
 <body>
 <div id="root">
+  <div class="scroll-hint">SCROLL DOWN<br>向下滚动</div>
   <div class="scroll-wrap" id="scrollWrap">
     <div class="sticky" id="sticky">
 
@@ -518,9 +523,9 @@ const $$ = (sel) => sticky.querySelectorAll(sel);
 /* s1 hero */
 tl.addLabel('s1', LABELS[0])
   .to(sections[0], {autoAlpha:1, duration:.01}, 's1')
-  .from($$('.hero-title'), {scale:.92, y:'6vh', autoAlpha:0, duration:.42, ease:'power2.out'}, 's1+=0.04')
-  .from($$('.hero-sub'), {y:'2vh', autoAlpha:0, duration:.28, ease:'power2.out'}, 's1+=0.40')
-  .from($$('.hero-line'), {scaleY:0, autoAlpha:0, duration:.21, transformOrigin:'top center'}, 's1+=0.56')
+  .fromTo($$('.hero-title'), {scale:.92, y:'6vh', autoAlpha:1}, {scale:1, y:0, autoAlpha:1, duration:.42, ease:'power2.out'}, 's1+=0.04')
+  .fromTo($$('.hero-sub'), {y:'2vh', autoAlpha:1}, {y:0, autoAlpha:1, duration:.28, ease:'power2.out'}, 's1+=0.40')
+  .fromTo($$('.hero-line'), {scaleY:.5, autoAlpha:1}, {scaleY:1, autoAlpha:1, duration:.21, transformOrigin:'top center'}, 's1+=0.56')
   .to(sections[0], {autoAlpha:0, duration:.21}, 's1+=1.15');
 
 /* s2 type */
