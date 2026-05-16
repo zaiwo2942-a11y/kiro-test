@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>注意力的战争</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Sans+SC:wght@200;300;400;500&family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --ink:    #0a0a0a;
+    --bone:   #efe9d8;
+    --bone-2: #e6dfca;
+    --blood:  #d6321f;
+    --line:   rgba(10,10,10,0.6);
+    --line-l: rgba(10,10,10,0.22);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body {
+    width:100%; height:100%;
+    background: var(--ink);
+    overflow: hidden;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--ink);
+  }
+  body { display:flex; align-items:center; justify-content:center; }
+
+  /* ============== 纸感颗粒（极淡） ============== */
+  body::after {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:200;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.5; mix-blend-mode: multiply;
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 56.25vw;
+    max-height: 100vh;
+    max-width: 177.78vh;
+    background: var(--bone);
+    overflow: hidden;
+    --u: calc(min(100vw, 177.78vh) / 100);
+  }
+
+  .shot { position:absolute; inset:0; display:none; }
+  .shot.on { display:block; }
+
+  /* ============== 通用排版 ============== */
+  .center {
+    position:absolute; top:50%; left:50%;
+    transform: translate(-50%,-50%);
+  }
+  .ch { display:inline-block; }
+  .red { color: var(--blood); }
+  .red-dot {
+    display:inline-block;
+    width: calc(var(--u) * 0.55);
+    height: calc(var(--u) * 0.55);
+    border-radius: 50%;
+    background: var(--blood);
+    vertical-align: middle;
+    margin: 0 calc(var(--u) * 0.6);
+    transform: translateY(-0.05em);
+  }
+
+  /* ============== 全局角标（极简） ============== */
+  .corner {
+    position:absolute;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 0.85);
+    letter-spacing: 0.32em;
+    color: var(--ink);
+    opacity: 0.45;
+    z-index: 40;
+    text-transform: uppercase;
+  }
+  .corner.tl { top: calc(var(--u) * 3); left: calc(var(--u) * 3); }
+  .corner.tr { top: calc(var(--u) * 3); right: calc(var(--u) * 3); }
+  .corner.bl { bottom: calc(var(--u) * 3); left: calc(var(--u) * 3); }
+  .corner.br { bottom: calc(var(--u) * 3); right: calc(var(--u) * 3); }
+  .corner.bl::before {
+    content:''; display:inline-block;
+    width: calc(var(--u) * 1.2); height: 1px;
+    background: var(--ink); opacity: 0.6;
+    vertical-align: middle; margin-right: calc(var(--u) * 0.7);
+  }
+  .corner.br::after {
+    content:''; display:inline-block;
+    width: calc(var(--u) * 1.2); height: 1px;
+    background: var(--ink); opacity: 0.6;
+    vertical-align: middle; margin-left: calc(var(--u) * 0.7);
+  }
+
+  /* ============== 控制条 ============== */
+  .controls {
+    position: fixed;
+    bottom: 18px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: flex; gap: 8px;
+    background: rgba(10,10,10,0.88);
+    padding: 10px 14px;
+    border: 1px solid #2a2a2a;
+    color: var(--bone);
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.18em;
+    font-size: 12px;
+    align-items: center;
+  }
+  .controls button {
+    background: transparent; color: var(--bone);
+    border: 1px solid #555;
+    padding: 6px 12px;
+    font-family: inherit; font-size: 11px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+  }
+  .controls button:hover { background: var(--blood); border-color: var(--blood); }
+  .controls .scrubber {
+    width: 320px;
+    -webkit-appearance: none; appearance: none;
+    height: 1px; background: #555; outline: none;
+    cursor: pointer;
+  }
+  .controls .scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 11px; height: 11px;
+    background: var(--blood); border-radius: 50%;
+    cursor: pointer;
+  }
+  .controls .scrubber::-moz-range-thumb {
+    width: 11px; height: 11px;
+    background: var(--blood); border-radius: 50%;
+    cursor: pointer; border: none;
+  }
+  .controls .tc { min-width: 92px; text-align:center; font-variant-numeric:tabular-nums; }
+  .controls.hidden { display:none; }
+
+  .start-btn {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    color: var(--bone);
+    border: 1px solid var(--bone);
+    padding: 18px 56px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 16px;
+    letter-spacing: 0.5em;
+    cursor: pointer; z-index: 1000;
+    text-transform: uppercase;
+  }
+  .start-btn:hover { background: var(--blood); border-color: var(--blood); }
+  .start-btn.hidden { display: none; }
+  .start-btn .sub {
+    display:block;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 0.6em;
+    margin-top: 8px;
+    opacity: 0.7;
+  }
+
+  .loader {
+    position: fixed; top: calc(50% + 80px); left: 50%;
+    transform: translateX(-50%);
+    color: var(--bone); opacity: 0.5;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px; letter-spacing: 0.4em;
+    z-index: 999;
+  }
+  .loader.hidden { display:none; }
+
+  /* ============== S1: 开场 一个红点 ============== */
+  .s1-dot {
+    position:absolute; top:50%; left:50%;
+    width: calc(var(--u) * 0.9);
+    height: calc(var(--u) * 0.9);
+    border-radius: 50%;
+    background: var(--blood);
+    transform: translate(-50%,-50%) scale(0);
+    opacity: 0;
+  }
+  .s1-title {
+    position:absolute;
+    bottom: calc(var(--u) * 14);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.6);
+    letter-spacing: 0.7em;
+    color: var(--ink);
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .s1-en {
+    position:absolute;
+    top: calc(var(--u) * 14);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.3);
+    letter-spacing: 0.45em;
+    color: var(--ink);
+    opacity: 0;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ============== S2: 这个世界就是 / 注意力的战争 ============== */
+  .s2-row1 {
+    position:absolute;
+    top: calc(var(--u) * 32);
+    left: calc(var(--u) * 14);
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 3.4);
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    opacity:0;
+  }
+  .s2-row2 {
+    position:absolute;
+    top: calc(var(--u) * 42);
+    left: calc(var(--u) * 14);
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 11);
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .s2-row2 .ch { opacity:0; display:inline-block; }
+  .s2-line {
+    position:absolute;
+    top: calc(var(--u) * 56);
+    left: calc(var(--u) * 14);
+    width: calc(var(--u) * 28);
+    height: 1px;
+    background: var(--ink);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .s2-meta {
+    position:absolute;
+    top: calc(var(--u) * 58);
+    left: calc(var(--u) * 14);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.05);
+    letter-spacing: 0.4em;
+    color: var(--ink);
+    opacity: 0;
+  }
+
+  /* ============== S3: 撕碎 / 千刀万剐 / 最高警戒 ============== */
+  .s3-stack {
+    position:absolute;
+    top: 50%; left: calc(var(--u) * 14);
+    transform: translateY(-50%);
+    display:flex; flex-direction:column;
+    gap: calc(var(--u) * 2.4);
+  }
+  .s3-line {
+    display:flex; align-items:center;
+    gap: calc(var(--u) * 1.4);
+    opacity:0;
+  }
+  .s3-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.3);
+    color: var(--blood);
+    width: calc(var(--u) * 4);
+    letter-spacing: 0.2em;
+  }
+  .s3-text {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 500;
+    font-size: calc(var(--u) * 4.6);
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+  .s3-text .strike {
+    position:relative;
+    display:inline-block;
+  }
+  .s3-text .strike::after {
+    content:'';
+    position:absolute;
+    left: -4%; right: -4%;
+    top: 50%;
+    height: calc(var(--u) * 0.18);
+    background: var(--blood);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .s3-stack.struck .s3-text .strike::after {
+    transform: scaleX(1);
+    transition: transform 0.7s cubic-bezier(.6,0,.3,1);
+    transition-delay: 0.4s;
+  }
+  .s3-mark {
+    position:absolute;
+    right: calc(var(--u) * 14);
+    top: calc(var(--u) * 24);
+    width: calc(var(--u) * 6);
+    height: calc(var(--u) * 6);
+    border: 1px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: calc(var(--u) * 2.4);
+    color: var(--blood);
+    opacity:0;
+  }
+
+  /* ============== S4: 目标只有两个 ============== */
+  .s4-title {
+    position:absolute;
+    top: calc(var(--u) * 22);
+    left: calc(var(--u) * 14);
+    font-family:'Noto Serif SC', serif;
+    font-weight:400;
+    font-size: calc(var(--u) * 2.4);
+    letter-spacing: 0.3em;
+    color: var(--ink);
+    opacity:0;
+  }
+  .s4-big {
+    position:absolute;
+    top: calc(var(--u) * 32);
+    left: calc(var(--u) * 14);
+    font-family:'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 32);
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: var(--ink);
+    opacity:0;
+  }
+  .s4-sub {
+    position:absolute;
+    top: calc(var(--u) * 70);
+    left: calc(var(--u) * 14);
+    font-family:'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.3);
+    letter-spacing: 0.5em;
+    color: var(--ink);
+    opacity: 0;
+  }
+  .s4-dot {
+    position:absolute;
+    top: calc(var(--u) * 36);
+    left: calc(var(--u) * 30);
+    width: calc(var(--u) * 0.7);
+    height: calc(var(--u) * 0.7);
+    background: var(--blood);
+    border-radius: 50%;
+    opacity:0;
+  }
+
+  /* ============== S5/S6: 01 / 02 守护 / 掠夺 ============== */
+  .num-shot {
+    padding: calc(var(--u) * 10) calc(var(--u) * 14);
+    height:100%;
+    display:flex; align-items:center; gap: calc(var(--u) * 8);
+  }
+  .num-shot .big {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 38);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    opacity: 0;
+  }
+  .num-shot .big sup {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 4);
+    color: var(--blood);
+    vertical-align: super;
+    margin-left: calc(var(--u) * 1);
+    letter-spacing: 0.2em;
+  }
+  .num-shot .meta {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.15);
+    color: var(--ink);
+    letter-spacing: 0.4em;
+    margin-bottom: calc(var(--u) * 1.2);
+    opacity: 0;
+    text-transform: uppercase;
+  }
+  .num-shot .verb {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 8.5);
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    line-height: 1;
+    opacity: 0;
+  }
+  .num-shot .obj {
+    font-family:'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.7);
+    color: var(--ink);
+    letter-spacing: 0.4em;
+    margin-top: calc(var(--u) * 2);
+    opacity: 0;
+  }
+  .num-shot .quote {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.6);
+    color: var(--ink);
+    opacity: 0.5;
+    letter-spacing: 0.2em;
+    margin-top: calc(var(--u) * 4);
+    opacity: 0;
+  }
+
+  /* ============== S7: 命根子 / 蝗虫过境 ============== */
+  .s7-grid {
+    position:absolute; inset:0;
+    display:grid;
+    grid-template-columns: 1fr 1px 1fr;
+  }
+  .s7-half {
+    padding: calc(var(--u) * 10);
+    display:flex; flex-direction:column;
+    justify-content:center;
+    position:relative;
+  }
+  .s7-divider {
+    background: var(--line-l);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  .s7-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.05);
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s7-verb {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 6);
+    letter-spacing: 0.05em;
+    margin-top: calc(var(--u) * 2);
+    color: var(--ink);
+    opacity:0;
+  }
+  .s7-as {
+    font-family:'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.15);
+    letter-spacing: 0.4em;
+    margin-top: calc(var(--u) * 1.5);
+    color: var(--ink); opacity:0;
+  }
+  .s7-meta {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 3.4);
+    letter-spacing: 0.08em;
+    margin-top: calc(var(--u) * 1);
+    color: var(--ink); opacity:0;
+  }
+
+  /* ============== S8: 发朋友圈 + 高质量 ============== */
+  .s8-wrap {
+    padding: calc(var(--u) * 14) calc(var(--u) * 14);
+  }
+  .s8-meta {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.05);
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s8-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight:600;
+    font-size: calc(var(--u) * 7);
+    letter-spacing: 0.05em;
+    margin-top: calc(var(--u) * 2);
+    color: var(--ink); opacity: 0;
+  }
+  .s8-l2 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 2.6);
+    letter-spacing: 0.18em;
+    margin-top: calc(var(--u) * 4);
+    color: var(--ink); opacity: 0;
+  }
+  .s8-l2 .em {
+    font-weight: 600;
+    border-bottom: 1px solid var(--blood);
+    padding-bottom: calc(var(--u) * 0.4);
+  }
+  .s8-line {
+    position:absolute;
+    top: calc(var(--u) * 56);
+    left: calc(var(--u) * 14);
+    width: calc(var(--u) * 18);
+    height: 1px;
+    background: var(--ink); opacity: 0.5;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  /* ============== S9: 列表 ============== */
+  .s9-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    display:flex; flex-direction:column; height:100%;
+  }
+  .s9-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.05);
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s9-h {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 2.6);
+    letter-spacing: 0.2em;
+    margin-top: calc(var(--u) * 2);
+    color: var(--ink); opacity:0;
+  }
+  .s9-list {
+    margin-top: calc(var(--u) * 6);
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: calc(var(--u) * 4) calc(var(--u) * 8);
+    max-width: calc(var(--u) * 70);
+  }
+  .s9-item {
+    display:flex; align-items:baseline;
+    gap: calc(var(--u) * 1.5);
+    opacity:0;
+    border-bottom: 1px solid var(--line-l);
+    padding-bottom: calc(var(--u) * 1.6);
+  }
+  .s9-item .n {
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.5);
+    color: var(--blood);
+    letter-spacing: 0.2em;
+  }
+  .s9-item .t {
+    font-family:'Noto Serif SC', serif;
+    font-weight:500;
+    font-size: calc(var(--u) * 3);
+    letter-spacing: 0.12em;
+    color: var(--ink);
+  }
+
+  /* ============== S10: 潜在的伙伴 ============== */
+  .s10-wrap {
+    padding: calc(var(--u) * 16) calc(var(--u) * 14);
+    display:flex; flex-direction:column;
+    justify-content:center; height:100%;
+  }
+  .s10-line {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 4);
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    opacity:0;
+    line-height: 1.45;
+  }
+  .s10-line.em {
+    font-weight: 600;
+    margin-top: calc(var(--u) * 4);
+  }
+  .s10-line .red {
+    color: var(--blood);
+  }
+  .s10-arrow {
+    display:inline-block;
+    width: calc(var(--u) * 4);
+    height: 1px;
+    background: var(--blood);
+    vertical-align: middle;
+    margin: 0 calc(var(--u) * 1.5);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  /* ============== S11: 潜在用户 → 购买 (情绪积蓄) ============== */
+  .s11-wrap {
+    padding: calc(var(--u) * 14);
+    display:flex;
+    align-items:center;
+    height:100%;
+    gap: calc(var(--u) * 8);
+  }
+  .s11-left {
+    flex: 1;
+    display:flex;
+    flex-direction:column;
+    gap: calc(var(--u) * 2.4);
+  }
+  .s11-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.05);
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s11-line {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 500;
+    font-size: calc(var(--u) * 3.4);
+    letter-spacing: 0.1em;
+    color: var(--ink); opacity:0;
+  }
+  .s11-line.bold {
+    font-weight: 600;
+    font-size: calc(var(--u) * 4.4);
+  }
+  .s11-vis {
+    width: calc(var(--u) * 30);
+    height: calc(var(--u) * 30);
+    position:relative;
+  }
+  .s11-circle {
+    position:absolute;
+    border: 1px solid var(--ink);
+    opacity: 0.18;
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%) scale(0);
+    transform-origin: center;
+  }
+  .s11-circle.c1 { width: calc(var(--u) * 8); height: calc(var(--u) * 8); }
+  .s11-circle.c2 { width: calc(var(--u) * 16); height: calc(var(--u) * 16); }
+  .s11-circle.c3 { width: calc(var(--u) * 24); height: calc(var(--u) * 24); }
+  .s11-core {
+    position:absolute;
+    top:50%; left:50%;
+    width: calc(var(--u) * 1.2);
+    height: calc(var(--u) * 1.2);
+    background: var(--blood);
+    border-radius: 50%;
+    transform: translate(-50%,-50%) scale(0);
+  }
+
+  /* ============== S12: 讨厌的人 → 重新喜欢 ============== */
+  .s12-wrap {
+    padding: calc(var(--u) * 16) calc(var(--u) * 14);
+    display:flex; flex-direction:column; justify-content:center; height:100%;
+  }
+  .s12-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 3.4);
+    letter-spacing: 0.12em;
+    color: var(--ink); opacity:0;
+  }
+  .s12-l1 .strike {
+    text-decoration: line-through;
+    text-decoration-color: var(--blood);
+    text-decoration-thickness: 2px;
+  }
+  .s12-l2 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 5);
+    letter-spacing: 0.1em;
+    margin-top: calc(var(--u) * 4);
+    color: var(--ink); opacity:0;
+  }
+  .s12-l2 .red { color: var(--blood); }
+  .s12-meta {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.4em;
+    color: var(--ink);
+    opacity: 0.5;
+    margin-top: calc(var(--u) * 4);
+    opacity:0;
+  }
+
+  /* ============== S13: WIN-WIN-WIN ============== */
+  .s13-wrap {
+    padding: calc(var(--u) * 10) calc(var(--u) * 14);
+    display:flex; flex-direction:column;
+    justify-content:center; height:100%;
+    gap: calc(var(--u) * 1.4);
+  }
+  .s13-row {
+    display:flex; align-items:baseline;
+    gap: calc(var(--u) * 3);
+    opacity:0;
+  }
+  .s13-en {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 11);
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .s13-en .red { color: var(--blood); }
+  .s13-cn {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 1.6);
+    color: var(--ink);
+    letter-spacing: 0.4em;
+  }
+
+  /* ============== S14: 时间 ============== */
+  .s14-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    height:100%;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .s14-en {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 22);
+    line-height: 0.9;
+    color: var(--ink);
+    opacity:0;
+    letter-spacing: -0.02em;
+  }
+  .s14-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 2.6);
+    margin-top: calc(var(--u) * 4);
+    letter-spacing: 0.18em;
+    color: var(--ink); opacity:0;
+  }
+  .s14-l2 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 3.6);
+    margin-top: calc(var(--u) * 1.2);
+    letter-spacing: 0.1em;
+    color: var(--ink); opacity:0;
+  }
+  .s14-l2 .red { color: var(--blood); }
+
+  /* ============== S15: 凝结 ============== */
+  .s15-wrap {
+    padding: calc(var(--u) * 14);
+    height: 100%;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+  }
+  .s15-line {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 3.6);
+    letter-spacing: 0.12em;
+    color: var(--ink); opacity:0;
+    text-align:center;
+  }
+  .s15-line.big {
+    font-weight: 600;
+    font-size: calc(var(--u) * 5.5);
+    margin: calc(var(--u) * 2) 0;
+  }
+  .s15-line .red { color: var(--blood); }
+  .s15-line .arrow {
+    display:inline-block;
+    margin: 0 calc(var(--u) * 1.5);
+    color: var(--blood);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+  }
+
+  /* ============== S16: 攻城略地 公众号 小红书 短视频 长视频 ============== */
+  .s16-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    height: 100%;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .s16-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s16-h {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 4.6);
+    letter-spacing: 0.1em;
+    margin-top: calc(var(--u) * 2);
+    color: var(--ink); opacity:0;
+  }
+  .s16-grid {
+    margin-top: calc(var(--u) * 5);
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: calc(var(--u) * 2);
+    max-width: calc(var(--u) * 70);
+  }
+  .s16-cell {
+    border: 1px solid var(--line-l);
+    padding: calc(var(--u) * 2.2) calc(var(--u) * 1.5);
+    text-align:center;
+    opacity:0;
+  }
+  .s16-cell .n {
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size: calc(var(--u) * 1);
+    color: var(--blood);
+    letter-spacing: 0.3em;
+    opacity: 0.8;
+  }
+  .s16-cell .name {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 500;
+    font-size: calc(var(--u) * 2.2);
+    color: var(--ink);
+    letter-spacing: 0.18em;
+    margin-top: calc(var(--u) * 1);
+  }
+
+  /* ============== S17: 朋友圈 巩固 ============== */
+  .s17-wrap {
+    padding: calc(var(--u) * 14);
+    height:100%;
+    display:flex; align-items:center;
+    justify-content: space-between;
+  }
+  .s17-l {
+    flex: 1;
+  }
+  .s17-l .tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s17-l .h {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 7);
+    letter-spacing: 0.06em;
+    margin-top: calc(var(--u) * 2);
+    color: var(--ink); opacity:0;
+  }
+  .s17-l .meta {
+    font-family:'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.5);
+    letter-spacing: 0.4em;
+    margin-top: calc(var(--u) * 3);
+    color: var(--ink); opacity:0;
+  }
+  .s17-r {
+    width: calc(var(--u) * 30);
+    border-left: 1px solid var(--line-l);
+    padding-left: calc(var(--u) * 4);
+  }
+  .s17-r .word {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 2.2);
+    letter-spacing: 0.2em;
+    color: var(--ink);
+    opacity:0;
+    padding: calc(var(--u) * 1) 0;
+  }
+  .s17-r .word .red { color: var(--blood); }
+
+  /* ============== S18: 大小录 / 灵感 ============== */
+  .s18-wrap {
+    padding: calc(var(--u) * 14);
+    height: 100%;
+    display:flex; flex-direction:column;
+    justify-content: center;
+  }
+  .s18-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 2.4);
+    letter-spacing: 0.18em;
+    color: var(--ink); opacity:0;
+  }
+  .s18-l2 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 8);
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    margin-top: calc(var(--u) * 2);
+    line-height: 1.05;
+  }
+  .s18-l2 .ch { display:inline-block; opacity:0; }
+  .s18-l3 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 2);
+    letter-spacing: 0.18em;
+    margin-top: calc(var(--u) * 4);
+    color: var(--ink); opacity:0;
+  }
+  .s18-l3 .red { color: var(--blood); }
+
+  /* ============== S19: 再说一遍 ============== */
+  .s19-wrap {
+    padding: calc(var(--u) * 14);
+    height:100%;
+    display:flex; flex-direction:column;
+    justify-content:center;
+  }
+  .s19-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.5em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s19-h {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 6);
+    letter-spacing: 0.05em;
+    margin-top: calc(var(--u) * 2);
+    color: var(--ink); opacity: 0;
+  }
+  .s19-tags {
+    display:flex; gap: calc(var(--u) * 2);
+    margin-top: calc(var(--u) * 5);
+    flex-wrap:wrap;
+  }
+  .s19-tag-item {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 1.8);
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    border: 1px solid var(--line-l);
+    padding: calc(var(--u) * 1.2) calc(var(--u) * 2.4);
+    opacity:0;
+  }
+  .s19-tag-item .red { color: var(--blood); }
+
+  /* ============== S20: 守卫的本质 = 稳住情绪 ============== */
+  .s20-wrap {
+    padding: calc(var(--u) * 14);
+    height:100%;
+    display:flex; flex-direction:column;
+    justify-content:center;
+  }
+  .s20-eq {
+    display:flex; align-items:baseline;
+    gap: calc(var(--u) * 3);
+    flex-wrap:wrap;
+  }
+  .s20-l {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 4);
+    letter-spacing: 0.1em;
+    color: var(--ink); opacity:0;
+  }
+  .s20-eq-sign {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 4.5);
+    color: var(--blood);
+    opacity: 0;
+  }
+  .s20-r {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 5.5);
+    letter-spacing: 0.08em;
+    color: var(--ink); opacity: 0;
+  }
+  .s20-foot {
+    margin-top: calc(var(--u) * 6);
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.8);
+    letter-spacing: 0.2em;
+    color: var(--ink); opacity:0;
+  }
+  .s20-foot .red {
+    color: var(--blood);
+    border-bottom: 1px solid var(--blood);
+    padding-bottom: 2px;
+  }
+
+  /* ============== S21: 表达的本质 ============== */
+  .s21-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    height:100%;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .s21-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.45em;
+    color: var(--blood);
+    opacity:0;
+    text-transform: uppercase;
+  }
+  .s21-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 2.8);
+    margin-top: calc(var(--u) * 2);
+    letter-spacing: 0.15em;
+    color: var(--ink); opacity:0;
+  }
+  .s21-arrow {
+    display:block;
+    width: calc(var(--u) * 18);
+    height: 1px;
+    background: var(--ink);
+    margin: calc(var(--u) * 4) 0;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .s21-nums {
+    display:flex; align-items:baseline;
+    gap: calc(var(--u) * 4);
+  }
+  .s21-num {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 12);
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    opacity:0;
+  }
+  .s21-num .red { color: var(--blood); }
+  .s21-num .unit {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 1.8);
+    color: var(--ink);
+    letter-spacing: 0.2em;
+    margin-left: calc(var(--u) * 0.6);
+  }
+
+  /* ============== S22: 心里有位置 = 钱 影响力 资产 ============== */
+  .s22-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    height:100%;
+    display:flex; flex-direction:column;
+    justify-content:center;
+    gap: calc(var(--u) * 2);
+  }
+  .s22-row {
+    display:flex; align-items:baseline; gap: calc(var(--u) * 2);
+    opacity:0;
+  }
+  .s22-n {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.4);
+    color: var(--blood);
+    letter-spacing: 0.3em;
+    width: calc(var(--u) * 4);
+  }
+  .s22-eq {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 3);
+    color: var(--blood);
+  }
+  .s22-l {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 3);
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    width: calc(var(--u) * 16);
+  }
+  .s22-r {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 4);
+    letter-spacing: 0.12em;
+    color: var(--ink);
+  }
+  .s22-r.last { color: var(--blood); }
+
+  /* ============== S23: 想啊 写啊 说啊 发啊 ============== */
+  .s23-wrap {
+    padding: calc(var(--u) * 14);
+    height: 100%;
+    display:flex; flex-direction:column; justify-content:center;
+    gap: calc(var(--u) * 2.5);
+  }
+  .s23-line {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 6);
+    letter-spacing: 0.16em;
+    color: var(--ink);
+    opacity: 0;
+  }
+  .s23-line.big {
+    font-size: calc(var(--u) * 9);
+    color: var(--blood);
+    letter-spacing: 0.08em;
+  }
+
+  /* ============== S24: 滋养 vs 掠夺 ============== */
+  .s24-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    height: 100%;
+    display:flex; flex-direction:column;
+    justify-content:center;
+  }
+  .s24-quote {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: calc(var(--u) * 2.4);
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    opacity: 0;
+    line-height: 1.6;
+    max-width: calc(var(--u) * 60);
+  }
+  .s24-quote::before {
+    content:'"';
+    font-family: 'Cormorant Garamond', serif;
+    font-size: calc(var(--u) * 8);
+    color: var(--blood);
+    line-height: 0;
+    margin-right: calc(var(--u) * 1.2);
+    vertical-align: -0.3em;
+    opacity: 0.5;
+  }
+  .s24-vs {
+    margin-top: calc(var(--u) * 5);
+    display:flex; align-items:baseline;
+    gap: calc(var(--u) * 4);
+  }
+  .s24-side {
+    display:flex; flex-direction:column;
+    gap: calc(var(--u) * 0.6);
+    opacity:0;
+  }
+  .s24-side .top {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 1.8);
+    letter-spacing: 0.3em;
+    color: var(--ink);
+    opacity: 0.6;
+  }
+  .s24-side .bot {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 4);
+    letter-spacing: 0.12em;
+    color: var(--ink);
+  }
+  .s24-side.r .bot { color: var(--blood); }
+  .s24-vs-mid {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 2.8);
+    color: var(--ink); opacity: 0.4;
+    align-self:center;
+  }
+
+  /* ============== S25: 无能才狂怒 ============== */
+  .s25-wrap {
+    padding: calc(var(--u) * 14);
+    height: 100%;
+    display:flex; flex-direction:column;
+    justify-content:center;
+  }
+  .s25-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 7);
+    letter-spacing: 0.06em;
+    color: var(--ink); opacity:0;
+    line-height: 1.05;
+  }
+  .s25-l1 .red { color: var(--blood); }
+  .s25-l2 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: calc(var(--u) * 2.4);
+    letter-spacing: 0.18em;
+    color: var(--ink); opacity:0;
+    margin-top: calc(var(--u) * 4);
+  }
+
+  /* ============== S26: 圈层跃升 ============== */
+  .s26-wrap {
+    padding: calc(var(--u) * 14);
+    height:100%;
+    position:relative;
+  }
+  .s26-stairs {
+    position:absolute;
+    bottom: calc(var(--u) * 14);
+    left: calc(var(--u) * 14);
+    display:flex; align-items:flex-end;
+    gap: calc(var(--u) * 0.8);
+  }
+  .s26-step {
+    width: calc(var(--u) * 6);
+    background: var(--line-l);
+    transform-origin: bottom;
+    transform: scaleY(0);
+  }
+  .s26-step.s1 { height: calc(var(--u) * 6); }
+  .s26-step.s2 { height: calc(var(--u) * 12); }
+  .s26-step.s3 { height: calc(var(--u) * 18); }
+  .s26-step.s4 { height: calc(var(--u) * 24); background: var(--ink); }
+  .s26-step.s5 {
+    height: calc(var(--u) * 30);
+    background: var(--blood);
+  }
+  .s26-text {
+    position:absolute;
+    top: calc(var(--u) * 16);
+    left: calc(var(--u) * 14);
+    max-width: calc(var(--u) * 50);
+  }
+  .s26-l1 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 2.4);
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    opacity:0;
+    line-height: 1.5;
+  }
+  .s26-l2 {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 4.6);
+    letter-spacing: 0.08em;
+    margin-top: calc(var(--u) * 3);
+    color: var(--ink); opacity:0;
+  }
+  .s26-l2 .red { color: var(--blood); }
+
+  /* ============== S27: 关注爱你的人 / 不喜欢你的人也爱上你 ============== */
+  .s27-wrap {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14);
+    height: 100%;
+    display:flex; flex-direction:column;
+    justify-content:center;
+    gap: calc(var(--u) * 4);
+  }
+  .s27-block {
+    opacity:0;
+  }
+  .s27-block .lab {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.5em;
+    color: var(--blood);
+    text-transform: uppercase;
+  }
+  .s27-block .text {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 500;
+    font-size: calc(var(--u) * 3.4);
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-top: calc(var(--u) * 1.4);
+    line-height: 1.5;
+  }
+  .s27-block .text .em {
+    font-weight: 700;
+    border-bottom: 1px solid var(--blood);
+  }
+
+  /* ============== S28: 这才是人生的美妙 / 收尾 ============== */
+  .s28-wrap {
+    height:100%;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+  }
+  .s28-q {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: calc(var(--u) * 4);
+    letter-spacing: 0.3em;
+    color: var(--ink); opacity:0;
+  }
+  .s28-en {
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: calc(var(--u) * 1.4);
+    letter-spacing: 0.5em;
+    color: var(--ink);
+    opacity: 0;
+    margin-top: calc(var(--u) * 3);
+    text-transform: uppercase;
+  }
+  .s28-divider {
+    width: calc(var(--u) * 16);
+    height: 1px;
+    background: var(--ink);
+    margin: calc(var(--u) * 6) 0 calc(var(--u) * 4);
+    transform-origin: center;
+    transform: scaleX(0);
+    opacity: 0.5;
+  }
+  .s28-final {
+    font-family:'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: calc(var(--u) * 3.6);
+    letter-spacing: 0.18em;
+    color: var(--ink); opacity:0;
+    line-height: 1.6;
+  }
+  .s28-final .red { color: var(--blood); }
+  .s28-fin {
+    margin-top: calc(var(--u) * 6);
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: calc(var(--u) * 1.1);
+    letter-spacing: 0.6em;
+    color: var(--ink); opacity:0;
+    text-transform: uppercase;
+  }
+
+  /* ============== 全局过场（极淡 wash） ============== */
+  .wash {
+    position:absolute; inset:0;
+    background: var(--bone);
+    opacity: 0; pointer-events:none;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- 角标：左上 标题 / 右上 时间码 / 左下 编号 / 右下 标语 -->
+  <div class="corner tl">Attention &nbsp;·&nbsp; A Field Note</div>
+  <div class="corner tr" id="stampR">00:00</div>
+  <div class="corner bl">No.&nbsp;01</div>
+  <div class="corner br">守 &nbsp;卫 &nbsp;与 &nbsp;掠 &nbsp;夺</div>
+
+  <div class="wash" id="wash"></div>
+
+  <!-- ================ S1: 开场 ================ -->
+  <div class="shot" id="s1">
+    <div class="s1-en" id="s1en">The War of Attention</div>
+    <div class="s1-dot" id="s1dot"></div>
+    <div class="s1-title" id="s1title">注 意 力 的 战 争</div>
+  </div>
+
+  <!-- ================ S2: 这个世界 / 注意力的战争 ================ -->
+  <div class="shot" id="s2">
+    <div class="s2-row1" id="s2r1">这 个 世 界 就 是 ——</div>
+    <div class="s2-row2" id="s2r2">
+      <span class="ch">注</span><span class="ch">意</span><span class="ch">力</span><span class="ch">的</span><span class="ch">战</span><span class="ch">争</span>
+    </div>
+    <div class="s2-line" id="s2line"></div>
+    <div class="s2-meta" id="s2meta">A WAR &nbsp; OF &nbsp; ATTENTION</div>
+  </div>
+
+  <!-- ================ S3: 撕碎 / 千刀万剐 / 最高警戒 ================ -->
+  <div class="shot" id="s3">
+    <div class="s3-stack" id="s3stack">
+      <div class="s3-line" data-i="1">
+        <span class="s3-num">001</span>
+        <span class="s3-text">撕 碎 你 的 注 意 力</span>
+      </div>
+      <div class="s3-line" data-i="2">
+        <span class="s3-num">002</span>
+        <span class="s3-text"><span class="strike">千 刀 万 剐</span></span>
+      </div>
+      <div class="s3-line" data-i="3">
+        <span class="s3-num">003</span>
+        <span class="s3-text">最 高 警 戒</span>
+      </div>
+    </div>
+    <div class="s3-mark" id="s3mark">!</div>
+  </div>
+
+  <!-- ================ S4: 目标只有两个 ================ -->
+  <div class="shot" id="s4">
+    <div class="s4-title" id="s4t">所 以 — 目 标 只 有 两 个</div>
+    <div class="s4-big" id="s4big">02<span class="s4-dot" style="position:relative;display:inline-block;width:0.18em;height:0.18em;background:var(--blood);border-radius:50%;vertical-align:super;margin-left:0.05em;"></span></div>
+    <div class="s4-sub" id="s4sub">T H E &nbsp; O N L Y &nbsp; T W O</div>
+  </div>
+
+  <!-- ================ S5: 01 守护 ================ -->
+  <div class="shot" id="s5">
+    <div class="num-shot">
+      <div class="big" id="s5big">01</div>
+      <div>
+        <div class="meta" id="s5meta">DEFEND</div>
+        <div class="verb" id="s5verb">守 护</div>
+        <div class="obj" id="s5obj">自 己 的 注 意 力</div>
+        <div class="quote" id="s5q">— 像 守 护 命 根 子 一 样</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S6: 02 掠夺 ================ -->
+  <div class="shot" id="s6">
+    <div class="num-shot">
+      <div class="big" id="s6big">02</div>
+      <div>
+        <div class="meta" id="s6meta">PLUNDER</div>
+        <div class="verb" id="s6verb">掠 夺</div>
+        <div class="obj" id="s6obj">别 人 的 注 意 力</div>
+        <div class="quote" id="s6q">— 像 蝗 虫 过 境 一 样</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S7: 命根子 / 蝗虫 (并置) ================ -->
+  <div class="shot" id="s7">
+    <div class="s7-grid">
+      <div class="s7-half" id="s7l">
+        <div class="s7-tag">DEFEND · 守</div>
+        <div class="s7-verb">守 护</div>
+        <div class="s7-as">像 守 护</div>
+        <div class="s7-meta">命 根 子</div>
+      </div>
+      <div class="s7-divider" id="s7div"></div>
+      <div class="s7-half" id="s7r">
+        <div class="s7-tag">PLUNDER · 掠</div>
+        <div class="s7-verb">掠 夺</div>
+        <div class="s7-as">像</div>
+        <div class="s7-meta">蝗 虫 过 境</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S8: 发朋友圈 / 高质量 ================ -->
+  <div class="shot" id="s8">
+    <div class="s8-wrap">
+      <div class="s8-meta" id="s8m">SO &nbsp;— &nbsp;MAKE &nbsp;THEM &nbsp;SEE</div>
+      <div class="s8-l1" id="s8l1">有 话 说 ， 一 定 要 发 朋 友 圈</div>
+      <div class="s8-l2" id="s8l2">让 别 人 <span class="em">看 到 你</span> &nbsp; — &nbsp; 且 更 高 质 量 地 看 到</div>
+    </div>
+    <div class="s8-line" id="s8line"></div>
+  </div>
+
+  <!-- ================ S9: 列表 ================ -->
+  <div class="shot" id="s9">
+    <div class="s9-wrap">
+      <div class="s9-tag" id="s9tag">LET THEM KNOW &nbsp;— &nbsp;让 他 们 知 道</div>
+      <div class="s9-h" id="s9h">你 的 状 态 · 进 度 · 价 值 · 业 务</div>
+      <div class="s9-list">
+        <div class="s9-item"><span class="n">001 /</span><span class="t">你 在 做 什 么</span></div>
+        <div class="s9-item"><span class="n">002 /</span><span class="t">你 的 成 长 与 进 步</span></div>
+        <div class="s9-item"><span class="n">003 /</span><span class="t">你 值 多 少 钱</span></div>
+        <div class="s9-item"><span class="n">004 /</span><span class="t">你 的 业 务</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S10: 潜在的伙伴 ================ -->
+  <div class="shot" id="s10">
+    <div class="s10-wrap">
+      <div class="s10-line" id="s10l1">潜 在 的 伙 伴 &nbsp; — &nbsp; 看 见 你</div>
+      <div class="s10-line" id="s10l2">了 解 你 <span class="s10-arrow" id="s10a"></span> <span class="red">主 动 来 接 触 你</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S11: 潜在用户 → 购买 ================ -->
+  <div class="shot" id="s11">
+    <div class="s11-wrap">
+      <div class="s11-left">
+        <div class="s11-tag" id="s11t">USER · 潜 在 用 户</div>
+        <div class="s11-line" id="s11a">悄 悄 积 攒 购 买 的 意 愿</div>
+        <div class="s11-line" id="s11b">情 绪 积 蓄 足 够 — 然 后</div>
+        <div class="s11-line bold" id="s11c"><span class="red">爆 发 变 成 购 买</span></div>
+      </div>
+      <div class="s11-vis">
+        <div class="s11-circle c3" id="s11c3"></div>
+        <div class="s11-circle c2" id="s11c2"></div>
+        <div class="s11-circle c1" id="s11c1"></div>
+        <div class="s11-core" id="s11core"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S12: 讨厌的人 ================ -->
+  <div class="shot" id="s12">
+    <div class="s12-wrap">
+      <div class="s12-l1" id="s12l1">你 讨 厌 的 人 — 也 会 看 到 你</div>
+      <div class="s12-l2" id="s12l2">不 停 浪 费 他 的 注 意 力 — &nbsp;<span class="red">某 天 重 新 喜 欢 上 你</span></div>
+      <div class="s12-meta" id="s12m">WIN &nbsp;— &nbsp;WIN &nbsp;— &nbsp;WIN</div>
+    </div>
+  </div>
+
+  <!-- ================ S13: WIN-WIN-WIN ================ -->
+  <div class="shot" id="s13">
+    <div class="s13-wrap">
+      <div class="s13-row" id="s13a"><span class="s13-en"><em>Win</em></span><span class="s13-cn">伙 伴 来 找 你</span></div>
+      <div class="s13-row" id="s13b"><span class="s13-en"><em>Win</em></span><span class="s13-cn">用 户 买 了 你</span></div>
+      <div class="s13-row" id="s13c"><span class="s13-en"><em><span class="red">Win</span></em></span><span class="s13-cn">敌 人 也 爱 上 你</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S14: 时间 ================ -->
+  <div class="shot" id="s14">
+    <div class="s14-wrap">
+      <div class="s14-en" id="s14en"><em>Time</em></div>
+      <div class="s14-l1" id="s14l1">— 不 能 被 掠 夺</div>
+      <div class="s14-l2" id="s14l2">但 这 份 时 间 花 在 谁 身 上 — <span class="red">是 可 以 被 决 定 的</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S15: 凝结 / 触达 ================ -->
+  <div class="shot" id="s15">
+    <div class="s15-wrap">
+      <div class="s15-line" id="s15a">把 自 己 的 注 意 力 能 量</div>
+      <div class="s15-line big" id="s15b">凝 结 成 <span class="red">高 质 量 的 内 容</span></div>
+      <div class="s15-line" id="s15c"><span class="arrow">/</span> 尽 可 能 地 触 达 足 够 多 的 人 <span class="arrow">/</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S16: 攻城略地 ================ -->
+  <div class="shot" id="s16">
+    <div class="s16-wrap">
+      <div class="s16-tag" id="s16t">SO — 攻 城 略 地</div>
+      <div class="s16-h" id="s16h">公 众 号 · 小 红 书 · 短 视 频 · 长 视 频</div>
+      <div class="s16-grid">
+        <div class="s16-cell" id="s16c1"><div class="n">/ 01</div><div class="name">公 众 号</div></div>
+        <div class="s16-cell" id="s16c2"><div class="n">/ 02</div><div class="name">小 红 书</div></div>
+        <div class="s16-cell" id="s16c3"><div class="n">/ 03</div><div class="name">短 视 频</div></div>
+        <div class="s16-cell" id="s16c4"><div class="n">/ 04</div><div class="name">长 视 频</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S17: 朋友圈 巩固 ================ -->
+  <div class="shot" id="s17">
+    <div class="s17-wrap">
+      <div class="s17-l">
+        <div class="tag" id="s17t">AND — 巩 固 与 深 耕</div>
+        <div class="h" id="s17h">朋 友 圈</div>
+        <div class="meta" id="s17m">为 那 些 已 经 在 你 身 边 的 人</div>
+      </div>
+      <div class="s17-r">
+        <div class="word" id="s17w1">/ &nbsp;<span class="red">巩 固</span></div>
+        <div class="word" id="s17w2">/ &nbsp;<span class="red">深 耕</span></div>
+        <div class="word" id="s17w3">/ &nbsp;<span class="red">复 利</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S18: 大小录 / 灵感是礼物 ================ -->
+  <div class="shot" id="s18">
+    <div class="s18-wrap">
+      <div class="s18-l1" id="s18l1">习 惯 — 随 时 随 地</div>
+      <div class="s18-l2" id="s18l2">
+        <span class="ch">大</span><span class="ch">小</span><span class="ch">录</span>
+      </div>
+      <div class="s18-l3" id="s18l3">灵 感 是 老 天 给 你 的 礼 物 — &nbsp;<span class="red">有 效 期 很 短</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S19: 再说一遍 / 复利 资产 ================ -->
+  <div class="shot" id="s19">
+    <div class="s19-wrap">
+      <div class="s19-tag" id="s19t">AGAIN &nbsp;— &nbsp;再 说 一 遍</div>
+      <div class="s19-h" id="s19h">守 护 · 命 根 子 · 你 的 注 意 力</div>
+      <div class="s19-tags" id="s19tags">
+        <div class="s19-tag-item">可 以 <span class="red">复 利</span></div>
+        <div class="s19-tag-item">可 以 <span class="red">积 累 资 产</span></div>
+        <div class="s19-tag-item">至 少 — <span class="red">带 来 快 乐</span></div>
+        <div class="s19-tag-item">未 来 越 来 越 <span class="red">轻 松</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S20: 守卫的本质 = 稳住情绪 ================ -->
+  <div class="shot" id="s20">
+    <div class="s20-wrap">
+      <div class="s20-eq">
+        <div class="s20-l" id="s20l">守 卫 注 意 力 的 本 质</div>
+        <div class="s20-eq-sign" id="s20eq">=</div>
+        <div class="s20-r" id="s20r">稳 住 你 的 情 绪</div>
+      </div>
+      <div class="s20-foot" id="s20f">把 情 绪 当 作 信 号 &nbsp;— &nbsp;<span class="red">焦 虑 ， 就 是 注 意 力 在 流 失</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S21: 表达 = 一瞬 → 几千几万份 ================ -->
+  <div class="shot" id="s21">
+    <div class="s21-wrap">
+      <div class="s21-tag" id="s21t">EXPRESS &nbsp;— &nbsp;表 达 的 本 质</div>
+      <div class="s21-l1" id="s21l">把 这 一 瞬 的 时 间 — 拿 到 互 联 网 上</div>
+      <div class="s21-arrow" id="s21arr"></div>
+      <div class="s21-nums">
+        <div class="s21-num" id="s21n1"><em>×&nbsp;100</em><span class="unit">份</span></div>
+        <div class="s21-num" id="s21n2"><em>×&nbsp;1,000</em><span class="unit">份</span></div>
+        <div class="s21-num" id="s21n3"><em><span class="red">×&nbsp;10,000</span></em><span class="unit">份 注 意 力</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S22: 心里有位置 = 钱 影响力 资产 ================ -->
+  <div class="shot" id="s22">
+    <div class="s22-wrap">
+      <div class="s22-row" id="s22a"><span class="s22-n">001</span><span class="s22-l">心 里 有 位 置</span><span class="s22-eq">=</span><span class="s22-r">钱</span></div>
+      <div class="s22-row" id="s22b"><span class="s22-n">002</span><span class="s22-l">心 里 有 位 置</span><span class="s22-eq">=</span><span class="s22-r">影 响 力</span></div>
+      <div class="s22-row" id="s22c"><span class="s22-n">003</span><span class="s22-l">心 里 有 位 置</span><span class="s22-eq">=</span><span class="s22-r last">你 的 资 产</span></div>
+    </div>
+  </div>
+
+  <!-- ================ S23: 想啊 写啊 说啊 发啊 ================ -->
+  <div class="shot" id="s23">
+    <div class="s23-wrap">
+      <div class="s23-line" id="s23a">想 啊 — 写 啊 — 说 啊</div>
+      <div class="s23-line big" id="s23b">发 啊 &nbsp; 发 啊 &nbsp; 发 啊</div>
+    </div>
+  </div>
+
+  <!-- ================ S24: 滋养 vs 掠夺 ================ -->
+  <div class="shot" id="s24">
+    <div class="s24-wrap">
+      <div class="s24-quote" id="s24q">真 正 持 久 的 注 意 力 — 靠 的 不 是 掠 夺 ， 而 是 让 对 方 觉 得 值 得 。</div>
+      <div class="s24-vs">
+        <div class="s24-side l" id="s24l">
+          <div class="top">被 收 割</div>
+          <div class="bot">流 量</div>
+        </div>
+        <div class="s24-vs-mid">vs</div>
+        <div class="s24-side r" id="s24r">
+          <div class="top">被 滋 养</div>
+          <div class="bot">信 任</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S25: 无能才狂怒 ================ -->
+  <div class="shot" id="s25">
+    <div class="s25-wrap">
+      <div class="s25-l1" id="s25l1"><span class="red">无 能</span> ， 才 会 狂 怒 。</div>
+      <div class="s25-l2" id="s25l2">真 的 有 办 法 的 人 — 连 阴 阳 怪 气 都 不 会</div>
+    </div>
+  </div>
+
+  <!-- ================ S26: 圈层跃升 ================ -->
+  <div class="shot" id="s26">
+    <div class="s26-wrap">
+      <div class="s26-text">
+        <div class="s26-l1" id="s26l1">让 时 间 不 重 要 的 人 — 去 聊 那 些 事</div>
+        <div class="s26-l2" id="s26l2">让 时 间 重 要 的 人 — <span class="red">不 可 避 免 地 沾 染 上 你</span></div>
+      </div>
+      <div class="s26-stairs">
+        <div class="s26-step s1" id="s26st1"></div>
+        <div class="s26-step s2" id="s26st2"></div>
+        <div class="s26-step s3" id="s26st3"></div>
+        <div class="s26-step s4" id="s26st4"></div>
+        <div class="s26-step s5" id="s26st5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S27: 关注爱你的人 / 不喜欢你的人 ================ -->
+  <div class="shot" id="s27">
+    <div class="s27-wrap">
+      <div class="s27-block" id="s27a">
+        <div class="lab">/ 01 &nbsp;LOVE</div>
+        <div class="text">关 注 那 些 — <span class="em">爱 你 的 人</span></div>
+      </div>
+      <div class="s27-block" id="s27b">
+        <div class="lab">/ 02 &nbsp;TIME</div>
+        <div class="text">活 得 够 久 — 那 些 不 喜 欢 你 的 人</div>
+      </div>
+      <div class="s27-block" id="s27c">
+        <div class="lab">/ 03 &nbsp;TURN</div>
+        <div class="text">无 可 救 药 地 — <span class="em">需 要 你 ， 爱 上 你</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ S28: 这才是人生的美妙 / 收尾 ================ -->
+  <div class="shot" id="s28">
+    <div class="s28-wrap">
+      <div class="s28-q" id="s28q">这 才 是 人 生 的 美 妙</div>
+      <div class="s28-en" id="s28en">— THIS IS THE BEAUTY OF A LIFE —</div>
+      <div class="s28-divider" id="s28div"></div>
+      <div class="s28-final" id="s28f">守 卫 你 的 注 意 力 ， <span class="red">掠 夺 别 人 的 注 意 力 。</span></div>
+      <div class="s28-fin" id="s28fin">— FIN —</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 启动按钮 -->
+<button class="start-btn" id="startBtn">
+  Begin
+  <span class="sub">注 &nbsp;意 &nbsp;力 &nbsp;的 &nbsp;战 &nbsp;争</span>
+</button>
+<div class="loader hidden" id="loader">LOADING . . .</div>
+
+<!-- 控制条 -->
+<div class="controls hidden" id="controls">
+  <button id="ctrlPlay">PLAY</button>
+  <button id="ctrlRestart">RESTART</button>
+  <input type="range" class="scrubber" id="scrub" min="0" max="512" step="0.1" value="0">
+  <span class="tc" id="ctrlTc">00:00 / 08:32</span>
+  <button id="ctrlHide" title="录屏前点这个">HIDE UI</button>
+</div>
+
+<!-- 音频 -->
+<audio id="audio" preload="auto" src="audio.mp3"></audio>
+
+<script>
+/* ============== 工具 ============== */
+const audio    = document.getElementById('audio');
+const startBtn = document.getElementById('startBtn');
+const stampR   = document.getElementById('stampR');
+const controls = document.getElementById('controls');
+const ctrlPlay = document.getElementById('ctrlPlay');
+const ctrlTc   = document.getElementById('ctrlTc');
+const scrub    = document.getElementById('scrub');
+const wash     = document.getElementById('wash');
+const loader   = document.getElementById('loader');
+
+function fmt(t){
+  const m = Math.floor(t/60).toString().padStart(2,'0');
+  const s = Math.floor(t%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+function show(id){
+  document.querySelectorAll('.shot').forEach(el => el.classList.remove('on'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('on');
+}
+/* 极淡 wash 过场（取代闪光） */
+function transition(dur=0.35){
+  gsap.fromTo(wash, {opacity: 0}, {opacity: 0.7, duration: dur*0.45, yoyo:true, repeat:1, ease:'sine.inOut'});
+}
+
+const animTokens = new Set();
+function newToken(){
+  const t = {alive:true};
+  animTokens.add(t);
+  return t;
+}
+function killAll(){
+  animTokens.forEach(t => t.alive = false);
+  animTokens.clear();
+  gsap.killTweensOf('*');
+  // 重置 stack 上的伪类切换
+  document.querySelectorAll('.s3-stack').forEach(s => s.classList.remove('struck'));
+}
+
+/* ============== Cue 列表（时间码 = 秒） ============== */
+const cues = [];
+
+/* C1 — 0:00 开场 静默 → 红点 → 标题 */
+cues.push({ at: 0.5, fn: () => {
+  show('s1');
+  gsap.set('.s1-dot', {opacity:0, scale:0});
+  gsap.set('.s1-en, .s1-title', {opacity:0});
+  gsap.to('#s1dot', {opacity:1, scale:1, duration:1.6, delay:0.3, ease:'power2.out'});
+  gsap.to('#s1title', {opacity:0.85, duration:2.0, delay:1.5, ease:'power1.out'});
+  gsap.to('#s1en', {opacity:0.55, duration:2.0, delay:2.2, ease:'power1.out'});
+}});
+
+/* C2 — 0:08 这个世界就是 / 注意力的战争 */
+cues.push({ at: 8.0, fn: () => {
+  show('s2');
+  transition();
+  gsap.set('#s2r1', {opacity:0, x:-30});
+  gsap.set('.s2-row2 .ch', {opacity:0, y:30});
+  gsap.set('#s2line', {scaleX:0});
+  gsap.set('#s2meta', {opacity:0});
+  gsap.to('#s2r1', {opacity:1, x:0, duration:1.2, delay:0.2, ease:'power2.out'});
+  gsap.to('.s2-row2 .ch', {opacity:1, y:0, duration:0.6, stagger:0.15, delay:1.4, ease:'power2.out'});
+  gsap.to('#s2line', {scaleX:1, duration:1.2, delay:3.2, ease:'power3.inOut'});
+  gsap.to('#s2meta', {opacity:0.7, duration:1.0, delay:3.6});
+}});
+
+/* C3 — 0:24 撕碎 / 千刀万剐 / 最高警戒 */
+cues.push({ at: 24.0, fn: () => {
+  show('s3');
+  transition();
+  gsap.set('.s3-line', {opacity:0, x:-20});
+  gsap.set('#s3mark', {opacity:0, scale:1.2});
+  gsap.to('.s3-line', {opacity:1, x:0, duration:0.9, stagger:1.6, delay:0.3, ease:'power2.out'});
+  // 第二行的删除线在第二行入场后触发
+  setTimeout(() => {
+    document.getElementById('s3stack').classList.add('struck');
+  }, 2300);
+  gsap.to('#s3mark', {opacity:0.9, scale:1, duration:0.6, delay:5.0, ease:'power2.out'});
+}});
+
+/* C4 — 0:42 目标只有两个 */
+cues.push({ at: 42.0, fn: () => {
+  show('s4');
+  transition();
+  gsap.set('#s4t', {opacity:0, y:-15});
+  gsap.set('#s4big', {opacity:0, y:30});
+  gsap.set('#s4sub', {opacity:0});
+  gsap.to('#s4t', {opacity:0.85, y:0, duration:1.0, delay:0.3, ease:'power2.out'});
+  gsap.to('#s4big', {opacity:1, y:0, duration:1.4, delay:1.2, ease:'power3.out'});
+  gsap.to('#s4sub', {opacity:0.55, duration:1.2, delay:2.6});
+}});
+
+/* C5 — 0:55 01 守护 */
+cues.push({ at: 55.0, fn: () => {
+  show('s5');
+  transition();
+  gsap.set('#s5big', {opacity:0, y:30});
+  gsap.set('#s5meta, #s5verb, #s5obj, #s5q', {opacity:0, x:-15});
+  gsap.to('#s5big', {opacity:1, y:0, duration:1.4, ease:'power3.out'});
+  gsap.to('#s5meta', {opacity:0.7, x:0, duration:1.0, delay:1.2});
+  gsap.to('#s5verb', {opacity:1, x:0, duration:1.2, delay:1.8, ease:'power2.out'});
+  gsap.to('#s5obj', {opacity:0.85, x:0, duration:1.0, delay:2.6});
+  gsap.to('#s5q', {opacity:0.55, x:0, duration:1.0, delay:3.4});
+}});
+
+/* C6 — 1:11 02 掠夺 */
+cues.push({ at: 71.0, fn: () => {
+  show('s6');
+  transition();
+  gsap.set('#s6big', {opacity:0, y:30});
+  gsap.set('#s6meta, #s6verb, #s6obj, #s6q', {opacity:0, x:-15});
+  gsap.to('#s6big', {opacity:1, y:0, duration:1.4, ease:'power3.out'});
+  gsap.to('#s6meta', {opacity:0.7, x:0, duration:1.0, delay:1.2});
+  gsap.to('#s6verb', {opacity:1, x:0, duration:1.2, delay:1.8, ease:'power2.out'});
+  gsap.to('#s6obj', {opacity:0.85, x:0, duration:1.0, delay:2.6});
+  gsap.to('#s6q', {opacity:0.55, x:0, duration:1.0, delay:3.4});
+}});
+
+/* C7 — 1:27 命根子 / 蝗虫过境 (并置) */
+cues.push({ at: 87.0, fn: () => {
+  show('s7');
+  transition();
+  gsap.set('#s7div', {scaleY:0});
+  gsap.set('#s7l .s7-tag, #s7l .s7-verb, #s7l .s7-as, #s7l .s7-meta', {opacity:0, y:15});
+  gsap.set('#s7r .s7-tag, #s7r .s7-verb, #s7r .s7-as, #s7r .s7-meta', {opacity:0, y:15});
+  gsap.to('#s7div', {scaleY:1, duration:1.4, delay:0.2, ease:'power3.inOut'});
+  gsap.to('#s7l .s7-tag, #s7l .s7-verb, #s7l .s7-as, #s7l .s7-meta',
+    {opacity:1, y:0, duration:0.9, stagger:0.5, delay:0.6, ease:'power2.out'});
+  gsap.to('#s7r .s7-tag, #s7r .s7-verb, #s7r .s7-as, #s7r .s7-meta',
+    {opacity:1, y:0, duration:0.9, stagger:0.5, delay:3.5, ease:'power2.out'});
+}});
+
+/* C8 — 1:46 发朋友圈 / 高质量 */
+cues.push({ at: 106.0, fn: () => {
+  show('s8');
+  transition();
+  gsap.set('#s8m, #s8l1, #s8l2', {opacity:0, x:-15});
+  gsap.set('#s8line', {scaleX:0});
+  gsap.to('#s8m', {opacity:0.7, x:0, duration:1.0, delay:0.3});
+  gsap.to('#s8l1', {opacity:1, x:0, duration:1.2, delay:1.0, ease:'power2.out'});
+  gsap.to('#s8line', {scaleX:1, duration:1.0, delay:2.4, ease:'power3.inOut'});
+  gsap.to('#s8l2', {opacity:1, x:0, duration:1.2, delay:3.0, ease:'power2.out'});
+}});
+
+/* C9 — 2:06 列表（在做什么/成长/值多少钱/业务） */
+cues.push({ at: 126.0, fn: () => {
+  show('s9');
+  transition();
+  gsap.set('#s9tag, #s9h', {opacity:0, x:-15});
+  gsap.set('.s9-item', {opacity:0, y:15});
+  gsap.to('#s9tag', {opacity:0.7, x:0, duration:1.0, delay:0.3});
+  gsap.to('#s9h', {opacity:1, x:0, duration:1.0, delay:0.9, ease:'power2.out'});
+  gsap.to('.s9-item', {opacity:1, y:0, duration:0.8, stagger:0.6, delay:2.2, ease:'power2.out'});
+}});
+
+/* C10 — 2:25 潜在的伙伴 */
+cues.push({ at: 145.0, fn: () => {
+  show('s10');
+  transition();
+  gsap.set('#s10l1, #s10l2', {opacity:0, x:-15});
+  gsap.set('#s10a', {scaleX:0});
+  gsap.to('#s10l1', {opacity:1, x:0, duration:1.2, delay:0.3, ease:'power2.out'});
+  gsap.to('#s10l2', {opacity:1, x:0, duration:1.2, delay:2.0, ease:'power2.out'});
+  gsap.to('#s10a', {scaleX:1, duration:0.8, delay:2.5, ease:'power3.out'});
+}});
+
+/* C11 — 2:38 潜在用户 → 购买（情绪积蓄圆环） */
+cues.push({ at: 158.0, fn: () => {
+  show('s11');
+  transition();
+  gsap.set('#s11t, #s11a, #s11b, #s11c', {opacity:0, x:-15});
+  gsap.set('.s11-circle, .s11-core', {opacity:0, scale:0});
+  gsap.to('#s11t', {opacity:0.7, x:0, duration:0.9, delay:0.3});
+  gsap.to('#s11core', {opacity:1, scale:1, duration:0.6, delay:0.4, ease:'power2.out'});
+  gsap.to('#s11a', {opacity:1, x:0, duration:1.0, delay:0.9, ease:'power2.out'});
+  gsap.to('#s11c1', {opacity:1, scale:1, duration:1.0, delay:1.4, ease:'power2.out'});
+  gsap.to('#s11b', {opacity:1, x:0, duration:1.0, delay:2.4, ease:'power2.out'});
+  gsap.to('#s11c2', {opacity:1, scale:1, duration:1.0, delay:2.8, ease:'power2.out'});
+  gsap.to('#s11c', {opacity:1, x:0, duration:1.0, delay:4.0, ease:'power2.out'});
+  gsap.to('#s11c3', {opacity:1, scale:1, duration:1.0, delay:4.2, ease:'power2.out'});
+}});
+
+/* C12 — 2:54 讨厌的人 → 重新喜欢 */
+cues.push({ at: 174.0, fn: () => {
+  show('s12');
+  transition();
+  gsap.set('#s12l1, #s12l2, #s12m', {opacity:0, y:15});
+  gsap.to('#s12l1', {opacity:1, y:0, duration:1.2, delay:0.3, ease:'power2.out'});
+  gsap.to('#s12l2', {opacity:1, y:0, duration:1.2, delay:2.4, ease:'power2.out'});
+  gsap.to('#s12m', {opacity:0.55, y:0, duration:1.0, delay:5.0});
+}});
+
+/* C13 — 3:08 WIN-WIN-WIN */
+cues.push({ at: 188.0, fn: () => {
+  show('s13');
+  transition();
+  gsap.set('.s13-row', {opacity:0, x:-25});
+  gsap.to('.s13-row', {opacity:1, x:0, duration:0.9, stagger:0.7, delay:0.3, ease:'power2.out'});
+}});
+
+/* C14 — 3:18 时间 */
+cues.push({ at: 198.0, fn: () => {
+  show('s14');
+  transition();
+  gsap.set('#s14en', {opacity:0, x:-30});
+  gsap.set('#s14l1, #s14l2', {opacity:0, x:-15});
+  gsap.to('#s14en', {opacity:1, x:0, duration:1.4, delay:0.3, ease:'power3.out'});
+  gsap.to('#s14l1', {opacity:0.7, x:0, duration:1.0, delay:1.6});
+  gsap.to('#s14l2', {opacity:1, x:0, duration:1.2, delay:3.0, ease:'power2.out'});
+}});
+
+/* C15 — 3:36 凝结 / 触达 */
+cues.push({ at: 216.0, fn: () => {
+  show('s15');
+  transition();
+  gsap.set('#s15a, #s15b, #s15c', {opacity:0, y:20});
+  gsap.to('#s15a', {opacity:0.85, y:0, duration:1.2, delay:0.3, ease:'power2.out'});
+  gsap.to('#s15b', {opacity:1, y:0, duration:1.2, delay:1.8, ease:'power2.out'});
+  gsap.to('#s15c', {opacity:0.7, y:0, duration:1.2, delay:3.6, ease:'power2.out'});
+}});
+
+/* C16 — 3:54 攻城略地 */
+cues.push({ at: 234.0, fn: () => {
+  show('s16');
+  transition();
+  gsap.set('#s16t, #s16h', {opacity:0, x:-15});
+  gsap.set('.s16-cell', {opacity:0, y:20});
+  gsap.to('#s16t', {opacity:0.7, x:0, duration:1.0, delay:0.3});
+  gsap.to('#s16h', {opacity:1, x:0, duration:1.2, delay:1.0, ease:'power2.out'});
+  gsap.to('.s16-cell', {opacity:1, y:0, duration:0.9, stagger:0.5, delay:2.6, ease:'power2.out'});
+}});
+
+/* C17 — 4:14 朋友圈 巩固 */
+cues.push({ at: 254.0, fn: () => {
+  show('s17');
+  transition();
+  gsap.set('#s17t, #s17h, #s17m', {opacity:0, x:-15});
+  gsap.set('#s17w1, #s17w2, #s17w3', {opacity:0, x:15});
+  gsap.to('#s17t', {opacity:0.7, x:0, duration:1.0, delay:0.3});
+  gsap.to('#s17h', {opacity:1, x:0, duration:1.2, delay:0.9, ease:'power2.out'});
+  gsap.to('#s17m', {opacity:0.7, x:0, duration:1.0, delay:2.0});
+  gsap.to('#s17w1', {opacity:1, x:0, duration:0.9, delay:2.6, ease:'power2.out'});
+  gsap.to('#s17w2', {opacity:1, x:0, duration:0.9, delay:3.4, ease:'power2.out'});
+  gsap.to('#s17w3', {opacity:1, x:0, duration:0.9, delay:4.2, ease:'power2.out'});
+}});
+
+/* C18 — 4:30 大小录 / 灵感是礼物 */
+cues.push({ at: 270.0, fn: () => {
+  show('s18');
+  transition();
+  gsap.set('#s18l1', {opacity:0, x:-15});
+  gsap.set('.s18-l2 .ch', {opacity:0, y:30});
+  gsap.set('#s18l3', {opacity:0, y:15});
+  gsap.to('#s18l1', {opacity:1, x:0, duration:1.0, delay:0.3, ease:'power2.out'});
+  gsap.to('.s18-l2 .ch', {opacity:1, y:0, duration:0.8, stagger:0.25, delay:1.4, ease:'power2.out'});
+  gsap.to('#s18l3', {opacity:0.85, y:0, duration:1.2, delay:3.6, ease:'power2.out'});
+}});
+
+/* C19 — 4:48 再说一遍 / 复利 资产 */
+cues.push({ at: 288.0, fn: () => {
+  show('s19');
+  transition();
+  gsap.set('#s19t, #s19h', {opacity:0, x:-15});
+  gsap.set('#s19tags .s19-tag-item', {opacity:0, y:15});
+  gsap.to('#s19t', {opacity:0.7, x:0, duration:1.0, delay:0.3});
+  gsap.to('#s19h', {opacity:1, x:0, duration:1.2, delay:0.9, ease:'power2.out'});
+  gsap.to('#s19tags .s19-tag-item', {opacity:1, y:0, duration:0.9, stagger:0.6, delay:2.4, ease:'power2.out'});
+}});
+
+/* C20 — 5:08 守卫 = 稳住情绪 */
+cues.push({ at: 308.0, fn: () => {
+  show('s20');
+  transition();
+  gsap.set('#s20l, #s20r, #s20f', {opacity:0, x:-15});
+  gsap.set('#s20eq', {opacity:0, scale:0.5});
+  gsap.to('#s20l', {opacity:1, x:0, duration:1.2, delay:0.3, ease:'power2.out'});
+  gsap.to('#s20eq', {opacity:1, scale:1, duration:0.7, delay:1.6, ease:'power2.out'});
+  gsap.to('#s20r', {opacity:1, x:0, duration:1.2, delay:2.0, ease:'power2.out'});
+  gsap.to('#s20f', {opacity:0.85, x:0, duration:1.2, delay:4.0, ease:'power2.out'});
+}});
+
+/* C21 — 5:25 表达 = ×100 ×1000 ×10000 */
+cues.push({ at: 325.0, fn: () => {
+  show('s21');
+  transition();
+  gsap.set('#s21t, #s21l', {opacity:0, x:-15});
+  gsap.set('#s21arr', {scaleX:0});
+  gsap.set('#s21n1, #s21n2, #s21n3', {opacity:0, y:30});
+  gsap.to('#s21t', {opacity:0.7, x:0, duration:1.0, delay:0.3});
+  gsap.to('#s21l', {opacity:1, x:0, duration:1.2, delay:0.9, ease:'power2.out'});
+  gsap.to('#s21arr', {scaleX:1, duration:1.4, delay:2.4, ease:'power3.inOut'});
+  gsap.to('#s21n1', {opacity:1, y:0, duration:0.8, delay:4.0, ease:'power2.out'});
+  gsap.to('#s21n2', {opacity:1, y:0, duration:0.8, delay:5.0, ease:'power2.out'});
+  gsap.to('#s21n3', {opacity:1, y:0, duration:1.0, delay:6.0, ease:'power2.out'});
+}});
+
+/* C22 — 5:48 心里有位置 = 钱 / 影响力 / 资产 */
+cues.push({ at: 348.0, fn: () => {
+  show('s22');
+  transition();
+  gsap.set('.s22-row', {opacity:0, x:-25});
+  gsap.to('.s22-row', {opacity:1, x:0, duration:1.0, stagger:1.2, delay:0.3, ease:'power2.out'});
+}});
+
+/* C23 — 6:05 想啊 写啊 说啊 发啊 发啊 发啊 */
+cues.push({ at: 365.0, fn: () => {
+  show('s23');
+  transition();
+  gsap.set('#s23a, #s23b', {opacity:0, y:25});
+  gsap.to('#s23a', {opacity:1, y:0, duration:1.2, delay:0.3, ease:'power2.out'});
+  gsap.to('#s23b', {opacity:1, y:0, duration:1.4, delay:2.4, ease:'power3.out'});
+}});
+
+/* C24 — 6:18 滋养 vs 掠夺 */
+cues.push({ at: 378.0, fn: () => {
+  show('s24');
+  transition();
+  gsap.set('#s24q', {opacity:0, x:-15});
+  gsap.set('#s24l, #s24r', {opacity:0, y:15});
+  gsap.to('#s24q', {opacity:0.95, x:0, duration:1.4, delay:0.3, ease:'power2.out'});
+  gsap.to('#s24l', {opacity:1, y:0, duration:1.0, delay:3.4, ease:'power2.out'});
+  gsap.to('#s24r', {opacity:1, y:0, duration:1.0, delay:4.4, ease:'power2.out'});
+}});
+
+/* C25 — 6:38 无能才狂怒 */
+cues.push({ at: 398.0, fn: () => {
+  show('s25');
+  transition();
+  gsap.set('#s25l1, #s25l2', {opacity:0, y:20});
+  gsap.to('#s25l1', {opacity:1, y:0, duration:1.4, delay:0.3, ease:'power3.out'});
+  gsap.to('#s25l2', {opacity:0.85, y:0, duration:1.4, delay:2.6, ease:'power2.out'});
+}});
+
+/* C26 — 6:58 圈层跃升 */
+cues.push({ at: 418.0, fn: () => {
+  show('s26');
+  transition();
+  gsap.set('#s26l1, #s26l2', {opacity:0, x:-15});
+  gsap.set('.s26-step', {scaleY:0});
+  gsap.to('#s26l1', {opacity:0.85, x:0, duration:1.2, delay:0.3, ease:'power2.out'});
+  gsap.to('.s26-step', {scaleY:1, duration:0.7, stagger:0.4, delay:1.8, ease:'power3.out'});
+  gsap.to('#s26l2', {opacity:1, x:0, duration:1.4, delay:4.0, ease:'power2.out'});
+}});
+
+/* C27 — 7:20 关注爱你的人 / 不喜欢你的人 */
+cues.push({ at: 440.0, fn: () => {
+  show('s27');
+  transition();
+  gsap.set('.s27-block', {opacity:0, x:-25});
+  gsap.to('.s27-block', {opacity:1, x:0, duration:1.2, stagger:2.5, delay:0.3, ease:'power2.out'});
+}});
+
+/* C28 — 7:50 这才是人生的美妙 / 收尾 */
+cues.push({ at: 470.0, fn: () => {
+  show('s28');
+  transition(0.5);
+  gsap.set('#s28q, #s28en, #s28f, #s28fin', {opacity:0});
+  gsap.set('#s28div', {scaleX:0});
+  gsap.to('#s28q', {opacity:1, duration:2.0, delay:0.5, ease:'power2.out'});
+  gsap.to('#s28en', {opacity:0.55, duration:1.6, delay:2.6});
+  gsap.to('#s28div', {scaleX:1, duration:1.4, delay:4.5, ease:'power3.inOut'});
+  gsap.to('#s28f', {opacity:1, duration:2.0, delay:6.0, ease:'power2.out'});
+  gsap.to('#s28fin', {opacity:0.55, duration:1.4, delay:10.0});
+}});
+
+/* ============== 主循环 ============== */
+let fired = new Set();
+let lastT = 0;
+function tick(){
+  const t = audio.currentTime;
+  stampR.textContent = fmt(t);
+  ctrlTc.textContent = `${fmt(t)} / 08:32`;
+  if (!isScrubbing) scrub.value = t;
+  if (t < lastT - 0.4) {
+    fired.clear();
+    killAll();
+    let last = null;
+    cues.forEach((c,i) => { if (t >= c.at) last = i; });
+    if (last !== null) {
+      for (let i=0; i<=last; i++) fired.add(i);
+      cues[last].fn();
+    }
+  }
+  cues.forEach((c,i) => {
+    if (t >= c.at && !fired.has(i)){
+      fired.add(i);
+      c.fn();
+    }
+  });
+  lastT = t;
+  requestAnimationFrame(tick);
+}
+
+startBtn.addEventListener('click', () => {
+  startBtn.classList.add('hidden');
+  loader.classList.remove('hidden');
+  audio.currentTime = 0;
+  fired.clear();
+  const tryPlay = () => {
+    audio.play().then(() => {
+      loader.classList.add('hidden');
+      controls.classList.remove('hidden');
+      ctrlPlay.textContent = 'PAUSE';
+      tick();
+    }).catch(err => {
+      loader.textContent = 'AUDIO LOAD FAILED — TRY RELOAD';
+      console.error(err);
+    });
+  };
+  if (audio.readyState >= 2) tryPlay();
+  else audio.addEventListener('canplay', tryPlay, {once:true});
+});
+
+audio.addEventListener('loadedmetadata', () => {
+  scrub.max = audio.duration;
+  ctrlTc.textContent = `00:00 / ${fmt(audio.duration)}`;
+});
+
+audio.addEventListener('ended', () => {
+  ctrlPlay.textContent = 'PLAY';
+});
+
+ctrlPlay.addEventListener('click', () => {
+  if (audio.paused){ audio.play(); ctrlPlay.textContent = 'PAUSE'; }
+  else { audio.pause(); ctrlPlay.textContent = 'PLAY'; }
+});
+
+document.getElementById('ctrlRestart').addEventListener('click', () => {
+  killAll();
+  fired.clear();
+  audio.currentTime = 0;
+  audio.play();
+  ctrlPlay.textContent = 'PAUSE';
+});
+
+document.getElementById('ctrlHide').addEventListener('click', () => {
+  controls.classList.add('hidden');
+  document.querySelectorAll('.corner').forEach(c => c.style.display = 'none');
+});
+
+let isScrubbing = false;
+scrub.addEventListener('input', () => {
+  isScrubbing = true;
+  audio.currentTime = parseFloat(scrub.value);
+});
+scrub.addEventListener('change', () => { isScrubbing = false; });
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space'){ e.preventDefault(); ctrlPlay.click(); }
+  if (e.code === 'ArrowLeft'){ audio.currentTime = Math.max(0, audio.currentTime - 5); }
+  if (e.code === 'ArrowRight'){ audio.currentTime = Math.min(audio.duration||512, audio.currentTime + 5); }
+});
+</script>
+</body>
+</html>
