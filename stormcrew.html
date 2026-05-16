@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>STORMCREW — Brand Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,600;1,700;1,800&family=Barlow:ital,wght@0,400;0,500;1,700&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0a0a0a; --white:#fff; --orange:#e01828;
+  --grey-dark:#141414; --grey-mid:#2a2a2a; --grey-light:#888;
+  --font-display:"Barlow Condensed", sans-serif;
+  --font-body:"Barlow", sans-serif;
+  --font-cn:"Noto Sans SC", sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:auto}
+body{background:var(--black);color:var(--white);font-family:var(--font-body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+svg{display:block}
+::selection{background:var(--orange);color:var(--black)}
+
+#root{display:block;width:100%}
+
+.scroll-wrap{height:2300vh;position:relative}
+.sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+
+.section{position:absolute;inset:0;overflow:hidden;opacity:0;visibility:hidden;will-change:opacity}
+
+/* ============== 1. HERO ============== */
+.s-hero{background:var(--black)}
+.hero-inner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90vw;text-align:center}
+.hero-title{font-family:var(--font-cn);font-weight:900;font-size:clamp(5rem,22vw,20rem);line-height:.95;letter-spacing:-.01em;color:var(--white)}
+.hero-sub{margin-top:2.2rem;font-family:var(--font-display);font-size:clamp(.7rem,1.2vw,1rem);letter-spacing:.5em;text-transform:uppercase;color:var(--grey-light)}
+.hero-line{width:1px;height:4rem;background:var(--grey-light);opacity:.4;margin:1.5rem auto 0}
+
+/* ============== 2. TYPE ============== */
+.s-type{background:var(--black)}
+.type-letter{position:absolute;top:50%;right:-4vw;transform:translateY(-50%);font-family:var(--font-display);font-style:italic;font-weight:800;font-size:68vw;line-height:1;color:#fff;opacity:.06;user-select:none;pointer-events:none}
+.type-anno-wrap{position:absolute;top:50%;left:5vw;transform:translateY(-50%);width:42vw;height:65vh}
+.type-anno-svg{width:100%;height:100%;overflow:visible}
+.type-label{font-family:var(--font-display);font-size:clamp(.6rem,1vw,.85rem);font-weight:600;letter-spacing:.25em;text-transform:uppercase;fill:var(--grey-light)}
+.type-value{font-family:var(--font-display);font-size:clamp(.55rem,.85vw,.72rem);font-weight:300;letter-spacing:.1em;fill:var(--orange)}
+
+/* ============== 3. BEZIER ============== */
+.s-bezier{background:var(--black)}
+.bezier-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(82vw,760px);height:min(78vh,600px)}
+.bezier-svg{width:100%;height:100%;overflow:visible}
+.bezier-label{position:absolute;left:50%;bottom:-3rem;transform:translateX(-50%);font-family:var(--font-display);font-size:clamp(.6rem,1vw,.8rem);letter-spacing:.4em;text-transform:uppercase;color:var(--grey-light);white-space:nowrap}
+
+/* ============== 4. LOGO ============== */
+.s-logo{background:var(--black)}
+.logo-wipe{position:absolute;inset:0;background:var(--white);clip-path:inset(0 100% 0 0);z-index:2}
+.logo-content{position:absolute;inset:0;background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.logo-main{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(4rem,12vw,12rem);line-height:1;color:var(--black);letter-spacing:-.02em}
+.logo-rule{width:min(70vw,700px);height:1px;background:#ccc;margin:2rem 0}
+.logo-meta{display:flex;gap:3rem;font-family:var(--font-display);font-size:clamp(.6rem,1vw,.8rem);letter-spacing:.5em;text-transform:uppercase;color:#888}
+.logo-partner{display:flex;align-items:center;justify-content:center;width:clamp(90px,13vw,150px);height:clamp(28px,3.5vw,44px);border:1px solid #bbb}
+.logo-partner-text{font-family:var(--font-display);font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;color:#aaa}
+.logo-split{display:flex;align-items:center;gap:5vw;margin-top:3rem}
+.logo-s-mark{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(4rem,11vw,9rem);line-height:1;color:var(--black)}
+.logo-lightning{width:clamp(36px,6vw,72px);height:clamp(60px,10vw,120px)}
+
+/* ============== 5. ANGLE ============== */
+.s-angle{background:var(--black)}
+.angle-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(88vw,800px);height:min(86vh,640px)}
+.angle-svg{width:100%;height:100%;overflow:visible}
+.angle-text-label{font-family:var(--font-display);font-size:11px;letter-spacing:.3em;fill:var(--grey-light);text-transform:uppercase}
+.angle-text-val{font-family:var(--font-display);font-size:14px;font-weight:600;fill:var(--orange);letter-spacing:.05em}
+
+/* ============== 6. MOOD ============== */
+.s-mood{background:var(--white)}
+.mood-wipe-in{position:absolute;inset:0;background:var(--white);clip-path:inset(0 100% 0 0);z-index:10}
+.mood-inner{position:absolute;inset:0}
+.mood-card{position:absolute;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+.mood-card .mc-text{font-family:var(--font-display);font-style:italic;font-weight:800;line-height:1.05;letter-spacing:-.01em;text-align:center;white-space:pre-line}
+.mood-card .mc-label{font-family:var(--font-display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(.55rem,.85vw,.7rem);color:rgba(245,245,243,.7);position:absolute;bottom:.7rem;left:.8rem}
+
+/* ============== 7. FEATURE ============== */
+.s-feature{background:var(--black)}
+.feature-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2rem}
+.feature-grid-svg{width:min(50vw,450px);height:min(50vw,450px);overflow:visible}
+.feature-label{font-family:var(--font-display);font-size:clamp(.65rem,1.1vw,.9rem);letter-spacing:.45em;text-transform:uppercase;color:var(--grey-light);text-align:center}
+.feature-spec{margin-top:.3rem;font-family:var(--font-display);font-size:clamp(.55rem,.9vw,.72rem);letter-spacing:.2em;text-transform:uppercase;color:var(--orange)}
+
+/* ============== 8. ICONS ============== */
+.s-icons{background:var(--black)}
+.icons-stage{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:1.4rem;overflow:hidden}
+.icons-row{display:flex;gap:1.4rem;padding:0 2rem;flex-shrink:0}
+.icon-card{flex-shrink:0;width:160px;height:160px;border:1px solid #222;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:1.2rem;background:var(--black)}
+.icon-card svg{width:40px;height:40px}
+.icon-card-cn{font-family:var(--font-cn);font-size:.75rem;letter-spacing:.1em;color:var(--white);text-align:center}
+.icon-card-en{font-family:var(--font-display);font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:var(--grey-light);text-align:center}
+.icon-card.is-active{border-color:var(--orange)}
+.icon-card.is-active .icon-card-en{color:var(--orange)}
+.icons-brand-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.icons-brand-text{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(4rem,12vw,11rem);letter-spacing:-.02em;color:var(--white);mix-blend-mode:difference}
+
+/* ============== 9. OUTDOOR ============== */
+.s-outdoor{background:var(--black)}
+.outdoor-bg{position:absolute;inset:0;will-change:transform,opacity}
+.outdoor-bg::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.outdoor-logo-wrap{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1rem;z-index:10}
+.outdoor-logo{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(5rem,13vw,12rem);letter-spacing:-.02em;color:var(--white);mix-blend-mode:difference}
+.outdoor-tag{font-family:var(--font-display);font-size:clamp(.55rem,.9vw,.75rem);letter-spacing:.6em;text-transform:uppercase;color:rgba(245,245,243,.5);mix-blend-mode:difference}
+.outdoor-dots{display:flex;gap:.5rem;margin-top:1.5rem}
+.outdoor-dot{width:6px;height:6px;background:rgba(245,245,243,.3);transition:all .3s}
+
+/* ============== 10. IP ============== */
+.s-ip{background:var(--black)}
+.ip-bg-svg{position:absolute;inset:0;width:100%;height:100%}
+.ip-letters-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:4vw}
+.ip-letter-clip{overflow:hidden;line-height:.85}
+.ip-letter-char{display:block;font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(14rem,38vw,48rem);line-height:.85;letter-spacing:-.04em;color:var(--white);transform:translateY(105%)}
+.ip-tag-wrap{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.75rem;text-align:center;opacity:0}
+.ip-tag-label{font-family:var(--font-display);font-size:clamp(.65rem,1.1vw,.9rem);font-weight:600;letter-spacing:.55em;text-transform:uppercase;color:var(--grey-light)}
+.ip-tag-rule{width:clamp(60px,8vw,100px);height:1px;background:var(--orange)}
+.ip-tag-cn{font-family:var(--font-cn);font-size:clamp(.75rem,1.2vw,1rem);letter-spacing:.2em;color:rgba(245,245,243,.4)}
+.ip-spec-corner{position:absolute;right:2rem;bottom:2rem;font-family:var(--font-display);font-size:clamp(.45rem,.7vw,.6rem);letter-spacing:.3em;text-transform:uppercase;color:#333;opacity:0}
+
+/* ============== 11. FINALE ============== */
+.s-finale{background:var(--black)}
+.finale-ground{position:absolute;left:0;right:0;bottom:22%;height:1px;background:var(--orange);transform:scaleX(0);transform-origin:left}
+.finale-letters-stage{position:absolute;left:0;right:0;bottom:22%;display:flex;align-items:flex-end;justify-content:center;gap:0;padding:0 3vw}
+.finale-letter-wrap{transform:scaleY(0);transform-origin:bottom;will-change:transform}
+.finale-letter{display:block;font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(4rem,11vw,12rem);line-height:1;letter-spacing:-.03em;color:var(--white);white-space:nowrap}
+.finale-tag-wrap{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;text-align:center;white-space:nowrap;opacity:0}
+.finale-tag-main{font-family:var(--font-cn);font-weight:700;font-size:clamp(1rem,2vw,1.6rem);color:var(--white);letter-spacing:.1em}
+.finale-tag-sub{font-family:var(--font-display);font-size:clamp(.5rem,.8vw,.7rem);letter-spacing:.5em;text-transform:uppercase;color:var(--grey-light)}
+.finale-deco-svg{position:absolute;left:0;right:0;bottom:20%;width:100%;height:auto;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="scroll-wrap" id="scrollWrap">
+    <div class="sticky" id="sticky">
+
+      <!-- 1. HERO -->
+      <section class="section s-hero" data-sec="0">
+        <div class="hero-inner">
+          <h1 class="hero-title">风暴使者</h1>
+          <p class="hero-sub">STORMCREW &nbsp; / &nbsp; BRAND PATH DERIVATION</p>
+          <div class="hero-line"></div>
+        </div>
+      </section>
+
+      <!-- 2. TYPE -->
+      <section class="section s-type" data-sec="1">
+        <div class="type-letter">S</div>
+        <div class="type-anno-wrap">
+          <svg class="type-anno-svg" viewBox="0 0 400 500" fill="none" preserveAspectRatio="xMidYMid meet">
+            <!-- vertical axis -->
+            <line class="type-v-line" x1="40" y1="20" x2="40" y2="480" stroke="#888" stroke-width="0.5" stroke-dasharray="460" stroke-dashoffset="460"/>
+            <!-- horizontal ticks -->
+            <line class="type-h-line" x1="40" y1="80" x2="380" y2="80" stroke="#444" stroke-width="0.5" stroke-dasharray="340" stroke-dashoffset="340"/>
+            <line class="type-h-line" x1="40" y1="200" x2="380" y2="200" stroke="#444" stroke-width="0.5" stroke-dasharray="340" stroke-dashoffset="340"/>
+            <line class="type-h-line" x1="40" y1="320" x2="380" y2="320" stroke="#444" stroke-width="0.5" stroke-dasharray="340" stroke-dashoffset="340"/>
+            <line class="type-h-line" x1="40" y1="440" x2="380" y2="440" stroke="#444" stroke-width="0.5" stroke-dasharray="340" stroke-dashoffset="340"/>
+            <!-- diagonal italic axis -->
+            <line class="type-diag" x1="80" y1="460" x2="320" y2="60" stroke="#e01828" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
+            <line class="type-diag" x1="180" y1="460" x2="380" y2="120" stroke="#e01828" stroke-width="0.5" stroke-dasharray="500" stroke-dashoffset="500" opacity="0.5"/>
+            <!-- labels -->
+            <text class="type-label" x="50" y="74">CAP HEIGHT</text>
+            <text class="type-value" x="320" y="74">1000 UNITS</text>
+            <text class="type-label" x="50" y="194">X-HEIGHT</text>
+            <text class="type-value" x="320" y="194">720 UNITS</text>
+            <text class="type-label" x="50" y="314">BASELINE</text>
+            <text class="type-value" x="320" y="314">0.000</text>
+            <text class="type-label" x="50" y="434">DESCENDER</text>
+            <text class="type-value" x="320" y="434">−220 UNITS</text>
+            <text class="type-label" x="200" y="495" text-anchor="middle">ITALIC AXIS &nbsp; · &nbsp; −10°</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 3. BEZIER -->
+      <section class="section s-bezier" data-sec="2">
+        <div class="bezier-wrap">
+          <svg class="bezier-svg" viewBox="0 0 760 600" fill="none">
+            <!-- grid -->
+            <g class="bezier-grid">
+              <pattern id="bgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+              </pattern>
+              <rect width="760" height="600" fill="url(#bgrid)"/>
+              <line x1="0" y1="300" x2="760" y2="300" stroke="#222" stroke-width="0.5"/>
+              <line x1="380" y1="0" x2="380" y2="600" stroke="#222" stroke-width="0.5"/>
+            </g>
+            <!-- handles -->
+            <line class="bezier-handle" x1="120" y1="480" x2="240" y2="120" stroke="#444" stroke-width="0.6" stroke-dasharray="380" stroke-dashoffset="380"/>
+            <line class="bezier-handle" x1="640" y1="120" x2="520" y2="480" stroke="#444" stroke-width="0.6" stroke-dasharray="380" stroke-dashoffset="380"/>
+            <!-- control dots -->
+            <circle class="bezier-ctrl-pt" cx="240" cy="120" r="4" fill="none" stroke="#888" stroke-width="1"/>
+            <circle class="bezier-ctrl-pt" cx="520" cy="480" r="4" fill="none" stroke="#888" stroke-width="1"/>
+            <!-- main path -->
+            <path class="bezier-path" d="M 120 480 C 240 120, 640 120, 640 480" stroke="#e01828" stroke-width="2" fill="none" stroke-dasharray="900" stroke-dashoffset="900" stroke-linecap="round"/>
+            <!-- nodes -->
+            <circle class="bezier-node" cx="120" cy="480" r="8" fill="#0a0a0a" stroke="#e01828" stroke-width="2"/>
+            <circle class="bezier-node-inner" cx="120" cy="480" r="3" fill="#e01828"/>
+            <circle class="bezier-node" cx="640" cy="480" r="8" fill="#0a0a0a" stroke="#e01828" stroke-width="2"/>
+            <circle class="bezier-node-inner" cx="640" cy="480" r="3" fill="#e01828"/>
+            <!-- callouts -->
+            <text class="bezier-callout" x="100" y="510" font-family="Barlow Condensed" font-size="11" fill="#888" letter-spacing="2">P0 (120, 480)</text>
+            <text class="bezier-callout" x="600" y="510" font-family="Barlow Condensed" font-size="11" fill="#888" letter-spacing="2">P3 (640, 480)</text>
+            <text class="bezier-callout" x="240" y="105" font-family="Barlow Condensed" font-size="11" fill="#e01828" letter-spacing="2" text-anchor="middle">P1</text>
+            <text class="bezier-callout" x="520" y="105" font-family="Barlow Condensed" font-size="11" fill="#e01828" letter-spacing="2" text-anchor="middle">P2</text>
+          </svg>
+          <div class="bezier-label">CUBIC BEZIER · BRAND CURVE FORMULA</div>
+        </div>
+      </section>
+
+      <!-- 4. LOGO -->
+      <section class="section s-logo" data-sec="3">
+        <div class="logo-wipe"></div>
+        <div class="logo-content">
+          <div style="display:flex;align-items:center;gap:3rem">
+            <h2 class="logo-main">STORMCREW</h2>
+            <div class="logo-partner"><span class="logo-partner-text">CREATOR<br>REDEFINE</span></div>
+          </div>
+          <div class="logo-rule"></div>
+          <div class="logo-meta">
+            <span>BRAND ID 0001</span><span>EST. 2024</span><span>ORIGIN · CN</span>
+          </div>
+          <div class="logo-split">
+            <div class="logo-s-mark">S</div>
+            <svg class="logo-lightning" viewBox="0 0 60 100" fill="none">
+              <path d="M 35 0 L 8 55 L 28 55 L 18 100 L 52 38 L 32 38 Z" fill="#e01828"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. ANGLE -->
+      <section class="section s-angle" data-sec="4">
+        <div class="angle-wrap">
+          <svg class="angle-svg" viewBox="0 0 800 640" fill="none">
+            <!-- vertical reference -->
+            <line class="angle-ref-v" x1="400" y1="60" x2="400" y2="580" stroke="#444" stroke-width="0.5" stroke-dasharray="520" stroke-dashoffset="520"/>
+            <line class="angle-ref-h" x1="100" y1="540" x2="700" y2="540" stroke="#444" stroke-width="0.5" stroke-dasharray="600" stroke-dashoffset="600"/>
+            <!-- the bar tilted -->
+            <g class="angle-bar" transform="translate(400 540)">
+              <rect x="-20" y="-460" width="40" height="460" fill="#e01828" rx="2" transform="rotate(-10)"/>
+            </g>
+            <!-- arc -->
+            <path class="angle-arc" d="M 400 200 A 340 340 0 0 0 340 215" stroke="#e01828" stroke-width="1.5" fill="none" stroke-dasharray="120" stroke-dashoffset="120"/>
+            <!-- dimension lines -->
+            <line class="angle-dim" x1="100" y1="540" x2="100" y2="500" stroke="#888" stroke-width="0.5" stroke-dasharray="40" stroke-dashoffset="40"/>
+            <line class="angle-dim" x1="700" y1="540" x2="700" y2="500" stroke="#888" stroke-width="0.5" stroke-dasharray="40" stroke-dashoffset="40"/>
+            <line class="angle-dim" x1="100" y1="520" x2="700" y2="520" stroke="#888" stroke-width="0.5" stroke-dasharray="600" stroke-dashoffset="600"/>
+            <!-- corner squares -->
+            <rect class="angle-sq" x="395" y="535" width="10" height="10" fill="none" stroke="#888" stroke-width="0.5"/>
+            <rect class="angle-sq" x="395" y="55" width="10" height="10" fill="none" stroke="#888" stroke-width="0.5"/>
+            <!-- labels -->
+            <g class="angle-label-group">
+              <text class="angle-text-label" x="320" y="180">BRAND TILT</text>
+              <text class="angle-text-val" x="320" y="200">−10.000°</text>
+            </g>
+            <g class="angle-label-group">
+              <text class="angle-text-label" x="450" y="100">LOGO ANGLE</text>
+              <text class="angle-text-val" x="450" y="120">−25.500°</text>
+            </g>
+            <g class="angle-label-group">
+              <text class="angle-text-label" x="100" y="495">SPAN</text>
+              <text class="angle-text-val" x="100" y="478">600 UNITS</text>
+            </g>
+            <text class="angle-section-label" x="400" y="620" font-family="Barlow Condensed" font-size="12" fill="#888" letter-spacing="6" text-anchor="middle">GEOMETRIC INCLINE SYSTEM</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 6. MOOD -->
+      <section class="section s-mood" data-sec="5">
+        <div class="mood-wipe-in"></div>
+        <div class="mood-inner" id="moodInner"></div>
+      </section>
+
+      <!-- 7. FEATURE -->
+      <section class="section s-feature" data-sec="6">
+        <div class="feature-center">
+          <div style="position:relative">
+            <svg class="feature-grid-svg" viewBox="0 0 320 320" fill="none" id="featureSvg">
+              <!-- grid lines and corner accents are added by JS -->
+            </svg>
+          </div>
+          <div class="feature-label-wrap" style="text-align:center">
+            <p class="feature-label">CREATIVE IGNITION</p>
+            <p class="feature-spec">SPEC · DROP / FLAME 02</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. ICONS -->
+      <section class="section s-icons" data-sec="7">
+        <div class="icons-stage" id="iconsStage"></div>
+        <div class="icons-brand-overlay">
+          <p class="icons-brand-text">STORMCREW</p>
+        </div>
+      </section>
+
+      <!-- 9. OUTDOOR -->
+      <section class="section s-outdoor" data-sec="8">
+        <!-- 5 background "scene" layers as gradient placeholders -->
+        <div class="outdoor-bg outdoor-bg-0" style="background:radial-gradient(ellipse at 30% 40%, #2a1a0e 0%, #0a0a0a 70%), linear-gradient(135deg,#1a1208 0%,#3a2010 50%,#0a0a0a 100%)"></div>
+        <div class="outdoor-bg outdoor-bg-1" style="background:linear-gradient(180deg,#0d1820 0%,#152838 50%,#080d12 100%)"></div>
+        <div class="outdoor-bg outdoor-bg-2" style="background:linear-gradient(135deg,#231518 0%,#3a1a20 50%,#0a0606 100%)"></div>
+        <div class="outdoor-bg outdoor-bg-3" style="background:radial-gradient(circle at 70% 20%, #2a2018 0%, #0a0a0a 80%)"></div>
+        <div class="outdoor-bg outdoor-bg-4" style="background:linear-gradient(135deg,#0a1820 0%,#143040 60%,#050a10 100%)"></div>
+        <div class="outdoor-logo-wrap">
+          <p class="outdoor-logo">STORMCREW</p>
+          <p class="outdoor-tag">LANGUAGE CHANGES EVERYTHING &nbsp;/&nbsp; CITY · STATION · STREET</p>
+          <div class="outdoor-dots">
+            <div class="outdoor-dot outdoor-dot-0" style="width:20px;background:var(--orange)"></div>
+            <div class="outdoor-dot outdoor-dot-1"></div>
+            <div class="outdoor-dot outdoor-dot-2"></div>
+            <div class="outdoor-dot outdoor-dot-3"></div>
+            <div class="outdoor-dot outdoor-dot-4"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. IP -->
+      <section class="section s-ip" data-sec="9">
+        <svg class="ip-bg-svg" viewBox="0 0 1000 700" fill="none" preserveAspectRatio="xMidYMid slice">
+          <line class="ip-grid-line" x1="0" y1="700" x2="1000" y2="0" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="1222" stroke-dashoffset="1222"/>
+          <line class="ip-grid-line" x1="0" y1="350" x2="1000" y2="350" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+          <line class="ip-grid-line" x1="500" y1="0" x2="500" y2="700" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+          <circle class="ip-grid-circle" cx="500" cy="350" r="290" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="1822" stroke-dashoffset="1822" fill="none"/>
+          <circle class="ip-grid-circle" cx="500" cy="350" r="180" stroke="#1c1c1c" stroke-width="0.5" stroke-dasharray="1131" stroke-dashoffset="1131" fill="none"/>
+          <line class="ip-accent" x1="150" y1="115" x2="200" y2="115" stroke="#e01828" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="50"/>
+          <line class="ip-accent" x1="800" y1="585" x2="850" y2="585" stroke="#e01828" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="50"/>
+          <line class="ip-accent" x1="105" y1="580" x2="105" y2="630" stroke="#e01828" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="50"/>
+          <line class="ip-accent" x1="895" y1="70" x2="895" y2="120" stroke="#e01828" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="50"/>
+          <text x="28" y="358" font-size="8" fill="#2a2a2a" letter-spacing="2" font-family="Barlow Condensed">IDENTITY MARK</text>
+        </svg>
+        <div class="ip-letters-wrap">
+          <span class="ip-letter-clip"><span class="ip-letter-char ip-char-i">I</span></span>
+          <span class="ip-letter-clip"><span class="ip-letter-char ip-char-p">P</span></span>
+        </div>
+        <div class="ip-tag-wrap">
+          <p class="ip-tag-label">INTELLECTUAL PROPERTY</p>
+          <div class="ip-tag-rule"></div>
+          <p class="ip-tag-cn">品牌核心资产</p>
+        </div>
+        <p class="ip-spec-corner">SPEC · 2024 · BRAND PATH 09 / 11</p>
+      </section>
+
+      <!-- 11. FINALE -->
+      <section class="section s-finale" data-sec="10">
+        <div class="finale-ground"></div>
+        <svg class="finale-deco-svg" viewBox="0 0 1000 40" fill="none">
+          <line class="finale-deco-0" x1="0" y1="20" x2="1000" y2="20" stroke="#e01828" stroke-width="0.5" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+        </svg>
+        <div class="finale-letters-stage" id="finaleStage"></div>
+        <div class="finale-tag-wrap">
+          <p class="finale-tag-main">语言改变一切</p>
+          <p class="finale-tag-sub">STORMCREW · BRAND PATH END</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- GSAP -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ----- inject feature grid ----- */
+(function buildFeatureGrid(){
+  const SIZE = 320, STEP = 40;
+  const svg = document.getElementById('featureSvg');
+  let inner = '';
+  for(let i=0;i<=SIZE;i+=STEP){
+    inner += `<line class="feature-grid-line" x1="${i}" y1="0" x2="${i}" y2="${SIZE}" stroke="#e01828" stroke-width="0.5" opacity="0.35"/>`;
+    inner += `<line class="feature-grid-line" x1="0" y1="${i}" x2="${SIZE}" y2="${i}" stroke="#e01828" stroke-width="0.5" opacity="0.35"/>`;
+  }
+  inner += `<rect class="feature-grid-border" x="0.5" y="0.5" width="${SIZE-1}" height="${SIZE-1}" stroke="#e01828" stroke-width="1.5" fill="none"/>`;
+  // corner accents
+  const cs = 20;
+  ['0,0','0,'+(SIZE),(SIZE)+',0',(SIZE)+','+SIZE].forEach(c=>{
+    const [x,y]=c.split(',').map(Number);
+    const dx = x===0?cs:-cs, dy = y===0?cs:-cs;
+    inner += `<line x1="${x}" y1="${y}" x2="${x+dx}" y2="${y}" stroke="#e01828" stroke-width="2"/>`;
+    inner += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+dy}" stroke="#e01828" stroke-width="2"/>`;
+  });
+  inner += `<line x1="${SIZE/2}" y1="0" x2="${SIZE/2}" y2="${SIZE}" stroke="#2a2a2a" stroke-width="0.5"/>`;
+  inner += `<line x1="0" y1="${SIZE/2}" x2="${SIZE}" y2="${SIZE/2}" stroke="#2a2a2a" stroke-width="0.5"/>`;
+  // drop shape (flame)
+  const path = "M 160 60 C 160 60, 90 130, 80 195 C 75 240, 110 270, 160 270 C 210 270, 245 240, 240 195 C 230 130, 160 60, 160 60 Z";
+  inner += `<path class="feature-icon-path" d="${path}" stroke="#fff" stroke-width="2.5" fill="none" stroke-dasharray="900" stroke-dashoffset="900" stroke-linejoin="round"/>`;
+  inner += `<circle class="feature-icon-dot" cx="160" cy="200" r="4" fill="#e01828" opacity="0"/>`;
+  svg.innerHTML = inner;
+})();
+
+/* ----- inject mood cards ----- */
+(function buildMood(){
+  const cards = [
+    {style:{top:'8%',left:'4%',width:'clamp(120px,18vw,210px)',height:'clamp(160px,22vw,260px)'},bg:'var(--orange)',rotation:-3,content:'BRAND\nINSIGHT'},
+    {style:{top:'10%',left:'27%',width:'clamp(150px,22vw,260px)',height:'clamp(110px,15vw,180px)'},bg:'var(--black)',rotation:2,content:'STORM\nCREW',color:'#fff'},
+    {style:{top:'6%',right:'18%',width:'clamp(140px,20vw,240px)',height:'clamp(140px,18vw,210px)'},bg:'#f5f0e8',rotation:-1,isText:true,bigText:'MOOD\nBOARD',smallText:'01 / 09'},
+    {style:{top:'30%',right:'4%',width:'clamp(130px,18vw,210px)',height:'clamp(100px,14vw,160px)'},bg:'#1a1a1a',rotation:4,content:'CINEMA\nGRADE',color:'#fff'},
+    {style:{top:'30%',left:'4%',width:'clamp(140px,20vw,230px)',height:'clamp(110px,15vw,180px)'},bg:'#e8e3da',rotation:0,isText:true,bigText:'TYPO\nFORM',smallText:'CONDENSED'},
+    {style:{top:'48%',left:'30%',width:'clamp(140px,21vw,250px)',height:'clamp(100px,15vw,170px)'},bg:'#fff',rotation:-2,isBrand:true},
+    {style:{top:'50%',right:'14%',width:'clamp(120px,17vw,200px)',height:'clamp(140px,19vw,220px)'},bg:'linear-gradient(160deg,#222,#444)',rotation:3,content:'STREET\nCULTURE',color:'#fff'},
+    {style:{bottom:'5%',left:'3%',width:'clamp(180px,28vw,330px)',height:'clamp(70px,11vw,130px)'},bg:'linear-gradient(90deg,#0a0a0a 0%,#1a1a1a 33%,#e01828 33%,#e01828 66%,#ffffff 66%)',rotation:0,isPalette:true},
+    {style:{bottom:'4%',right:'3%',width:'clamp(170px,26vw,310px)',height:'clamp(110px,16vw,190px)'},bg:'linear-gradient(135deg,#3d2818,#1a1008)',rotation:1,content:'FIELD\nWORK',color:'#fff',label:'PERSPECTIVE / PLAY'}
+  ];
+  const wrap = document.getElementById('moodInner');
+  cards.forEach((c,i)=>{
+    const el = document.createElement('div');
+    el.className='mood-card mood-card-'+i;
+    Object.assign(el.style, c.style);
+    el.style.background = c.bg;
+    el.style.transform = `rotate(${c.rotation}deg)`;
+    if(c.isBrand||c.isText) el.style.border='1px solid #ddd';
+    if(c.isPalette){ el.style.padding='0'; el.style.alignItems='stretch'; }
+    let html = '';
+    if(c.content){
+      const col = c.color || '#0a0a0a';
+      html += `<p class="mc-text" style="font-size:clamp(1rem,2.6vw,2.2rem);color:${col}">${c.content}</p>`;
+    }
+    if(c.isBrand){
+      html += `<p style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:clamp(1rem,2.6vw,2rem);color:#0a0a0a;letter-spacing:-.02em">STORMCREW</p>`;
+    }
+    if(c.isText){
+      html += `<div style="text-align:center;padding:.5rem">
+        <p style="font-family:var(--font-display);font-weight:800;font-style:italic;font-size:clamp(.9rem,1.8vw,1.6rem);color:#0a0a0a;line-height:1;letter-spacing:-.02em">${c.bigText}</p>
+        <p style="font-family:var(--font-display);font-size:clamp(.45rem,.7vw,.6rem);letter-spacing:.3em;color:#aaa;margin-top:.5rem;text-transform:uppercase">${c.smallText}</p>
+      </div>`;
+    }
+    if(c.label){
+      html += `<p class="mc-label">${c.label}</p>`;
+    }
+    el.innerHTML = html;
+    wrap.appendChild(el);
+  });
+})();
+
+/* ----- inject icons rows ----- */
+(function buildIcons(){
+  const items = [
+    {name:'闪电',en:'STRIKE',path:'M 18 4 L 8 18 L 14 18 L 12 28 L 22 14 L 16 14 Z'},
+    {name:'峰峦',en:'PEAK',path:'M 4 26 L 10 14 L 14 20 L 20 8 L 28 26 Z'},
+    {name:'指南',en:'COMPASS',path:'M 16 4 A 12 12 0 1 0 16 28 A 12 12 0 0 0 16 4 Z M 16 10 L 19 16 L 16 22 L 13 16 Z'},
+    {name:'风暴',en:'STORM',path:'M 6 12 L 22 12 M 4 18 L 26 18 M 8 24 L 20 24'},
+    {name:'装备',en:'GEAR',path:'M 16 4 L 18 8 L 22 8 L 22 12 L 26 14 L 24 18 L 26 22 L 22 22 L 22 26 L 18 26 L 16 28 L 14 26 L 10 26 L 10 22 L 6 22 L 8 18 L 6 14 L 10 12 L 10 8 L 14 8 Z'},
+    {name:'内容',en:'CONTENT',path:'M 6 4 L 26 4 L 26 28 L 6 28 Z M 10 10 L 22 10 M 10 15 L 22 15 M 10 20 L 18 20'},
+    {name:'品牌',en:'BRAND IP',path:'M 16 4 L 19 12 L 28 12 L 21 18 L 24 26 L 16 21 L 8 26 L 11 18 L 4 12 L 13 12 Z'},
+    {name:'路径',en:'PATH',path:'M 4 24 C 4 24, 12 4, 28 8'},
+    {name:'方位',en:'ANGLE',path:'M 6 26 L 26 26 L 6 6 Z'},
+    {name:'印记',en:'MARK',path:'M 8 8 L 24 8 L 24 24 L 8 24 Z M 12 12 L 20 12 L 20 20 L 12 20 Z'},
+    {name:'光线',en:'BEAM',path:'M 16 4 L 16 28 M 4 16 L 28 16 M 8 8 L 24 24 M 24 8 L 8 24'},
+    {name:'坐标',en:'COORD',path:'M 4 28 L 4 4 L 28 4 M 4 16 L 28 16 M 16 4 L 16 28'}
+  ];
+  const rows = [items.slice(0,4),items.slice(4,8),items.slice(8,12)];
+  const stage = document.getElementById('iconsStage');
+  rows.forEach((row, ri)=>{
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'icons-row icons-row-'+ri;
+    let repeated = [];
+    for(let r=0;r<4;r++) repeated = repeated.concat(row);
+    repeated.forEach((it,i)=>{
+      const card = document.createElement('div');
+      card.className = 'icon-card'+((i%7===2)?' is-active':'');
+      const stroke = (i%7===2)?'#e01828':'#fff';
+      card.innerHTML = `
+        <svg viewBox="0 0 32 32" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="${it.path}"/>
+        </svg>
+        <span class="icon-card-cn">${it.name}</span>
+        <span class="icon-card-en">${it.en}</span>`;
+      rowDiv.appendChild(card);
+    });
+    stage.appendChild(rowDiv);
+  });
+})();
+
+/* ----- inject finale letters ----- */
+(function buildFinale(){
+  const word = 'STORMCREW';
+  const heights = [1,.82,.91,.75,.96,1,.7,.88,.93];
+  const stage = document.getElementById('finaleStage');
+  word.split('').forEach((ch,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'finale-letter-wrap';
+    wrap.dataset.h = heights[i] ?? .9;
+    wrap.innerHTML = `<span class="finale-letter">${ch}</span>`;
+    stage.appendChild(wrap);
+  });
+})();
+
+/* ----- master scroll timeline ----- */
+const sections = document.querySelectorAll('.section');
+const wrap = document.getElementById('scrollWrap');
+const sticky = document.getElementById('sticky');
+
+// hide all but first initially
+gsap.set(sections, {autoAlpha:0});
+gsap.set(sections[0], {autoAlpha:1});
+
+// Section labels: spaced ~1.3 timeline units apart so each gets full attention
+const LABELS = [0,1.3,2.6,3.9,5.2,6.5,7.8,9.1,10.4,11.7,13];
+
+const tl = gsap.timeline({
+  scrollTrigger:{
+    trigger: wrap,
+    start:'top top',
+    end:'bottom bottom',
+    scrub: 2.5
+  }
+});
+
+const $$ = (sel) => sticky.querySelectorAll(sel);
+
+/* s1 hero */
+tl.addLabel('s1', LABELS[0])
+  .to(sections[0], {autoAlpha:1, duration:.01}, 's1')
+  .from($$('.hero-title'), {scale:.92, y:'6vh', autoAlpha:0, duration:.42, ease:'power2.out'}, 's1+=0.04')
+  .from($$('.hero-sub'), {y:'2vh', autoAlpha:0, duration:.28, ease:'power2.out'}, 's1+=0.40')
+  .from($$('.hero-line'), {scaleY:0, autoAlpha:0, duration:.21, transformOrigin:'top center'}, 's1+=0.56')
+  .to(sections[0], {autoAlpha:0, duration:.21}, 's1+=1.15');
+
+/* s2 type */
+tl.addLabel('s2', LABELS[1])
+  .to(sections[1], {autoAlpha:1, duration:.17}, 's2')
+  .from($$('.type-letter'), {x:'18vw', duration:.98, ease:'power2.out'}, 's2+=0.08')
+  .to($$('.type-v-line'), {strokeDashoffset:0, duration:.35, ease:'none'}, 's2+=0.12');
+
+$$('.type-h-line').forEach((el,i)=>tl.to(el, {strokeDashoffset:0, duration:.17, ease:'none'}, 's2+='+(0.22+i*0.10)));
+$$('.type-diag').forEach((el,i)=>tl.to(el, {strokeDashoffset:0, duration:.14, ease:'none'}, 's2+='+(0.30+i*0.10)));
+$$('.type-label').forEach((el,i)=>tl.from(el, {autoAlpha:0, duration:.14}, 's2+='+(0.34+i*0.06)));
+$$('.type-value').forEach((el,i)=>tl.from(el, {autoAlpha:0, x:6, duration:.14}, 's2+='+(0.42+i*0.06)));
+tl.to(sections[1], {autoAlpha:0, duration:.21}, 's2+=1.15');
+
+/* s3 bezier */
+tl.addLabel('s3', LABELS[2])
+  .to(sections[2], {autoAlpha:1, duration:.17}, 's3')
+  .from($$('.bezier-grid'), {autoAlpha:0, duration:.21}, 's3+=0.05')
+  .to($$('.bezier-handle'), {strokeDashoffset:0, stagger:.05, duration:.11, ease:'none'}, 's3+=0.12')
+  .from($$('.bezier-ctrl-pt'), {scale:0, transformOrigin:'center', stagger:.04, duration:.08}, 's3+=0.38')
+  .to($$('.bezier-path'), {strokeDashoffset:0, duration:.56, ease:'power1.inOut'}, 's3+=0.46')
+  .from($$('.bezier-node'), {scale:0, autoAlpha:0, transformOrigin:'center', stagger:.1, duration:.14, ease:'back.out(2)'}, 's3+=0.68')
+  .from($$('.bezier-node-inner'), {scale:0, transformOrigin:'center', stagger:.1, duration:.11}, 's3+=0.78')
+  .from($$('.bezier-callout'), {autoAlpha:0, y:6, stagger:.07, duration:.14}, 's3+=0.82')
+  .from($$('.bezier-label'), {autoAlpha:0, y:8, duration:.21}, 's3+=0.88')
+  .to(sections[2], {autoAlpha:0, duration:.01}, 's3+=1.15');
+
+/* s4 logo */
+tl.to(sections[3], {autoAlpha:1, duration:.01}, 's3+=1.15')
+  .addLabel('s4', LABELS[3])
+  .fromTo($$('.logo-wipe'), {clipPath:'inset(0 100% 0 0)'}, {clipPath:'inset(0 0% 0 0)', duration:.35, ease:'power2.inOut'}, 's4+=0.0')
+  .to($$('.logo-wipe'), {clipPath:'inset(0 0% 0 100%)', duration:.28, ease:'power2.inOut'}, 's4+=0.38')
+  .from($$('.logo-main'), {y:'4vh', autoAlpha:0, duration:.28, ease:'power2.out'}, 's4+=0.44')
+  .from($$('.logo-rule'), {scaleX:0, transformOrigin:'left center', duration:.35, ease:'power2.out'}, 's4+=0.56')
+  .from($$('.logo-meta'), {autoAlpha:0, y:6, duration:.21}, 's4+=0.65')
+  .from($$('.logo-partner'), {autoAlpha:0, scaleX:0, transformOrigin:'left center', duration:.21}, 's4+=0.70')
+  .from($$('.logo-split'), {autoAlpha:0, y:10, duration:.21}, 's4+=0.76')
+  .to($$('.logo-s-mark'), {x:'-2vw', duration:.35, ease:'power2.out'}, 's4+=0.82')
+  .to($$('.logo-lightning'), {x:'2vw', duration:.35, ease:'power2.out'}, 's4+=0.82')
+  .to(sections[3], {autoAlpha:0, duration:.21}, 's4+=1.15');
+
+/* s5 angle */
+tl.addLabel('s5', LABELS[4])
+  .to(sections[4], {autoAlpha:1, duration:.17}, 's5')
+  .from($$('.angle-bar'), {scaleY:0, transformOrigin:'top center', duration:.35, ease:'power2.out'}, 's5+=0.10')
+  .to($$('.angle-ref-v'), {strokeDashoffset:0, duration:.28, ease:'none'}, 's5+=0.38')
+  .to($$('.angle-ref-h'), {strokeDashoffset:0, duration:.28, ease:'none'}, 's5+=0.48')
+  .to($$('.angle-arc'), {strokeDashoffset:0, duration:.21, ease:'none'}, 's5+=0.58');
+
+$$('.angle-dim').forEach((el,i)=>tl.to(el, {strokeDashoffset:0, duration:.17, ease:'none'}, 's5+='+(0.62+i*0.08)));
+$$('.angle-sq').forEach((el,i)=>tl.from(el, {scale:0, transformOrigin:'center', duration:.11, ease:'back.out(2)'}, 's5+='+(0.7+i*0.08)));
+$$('.angle-label-group').forEach((el,i)=>tl.from(el, {autoAlpha:0, y:8, duration:.17}, 's5+='+(0.76+i*0.08)));
+tl.from($$('.angle-section-label'), {autoAlpha:0, duration:.17}, 's5+=0.90')
+  .to(sections[4], {autoAlpha:0, duration:.01}, 's5+=1.15');
+
+/* s6 mood */
+tl.to(sections[5], {autoAlpha:1, duration:.01}, 's5+=1.15')
+  .addLabel('s6', LABELS[5])
+  .fromTo($$('.mood-wipe-in'), {clipPath:'inset(0 100% 0 0)'}, {clipPath:'inset(0 0% 0 0)', duration:.31, ease:'power2.inOut'}, 's6+=0.0')
+  .to($$('.mood-wipe-in'), {clipPath:'inset(0 0% 0 100%)', duration:.25, ease:'power2.inOut'}, 's6+=0.33');
+
+const moodOff = [{x:60,y:-60},{x:-60,y:-80},{x:80,y:-50},{x:-80,y:60},{x:0,y:80},{x:60,y:-40},{x:-40,y:60},{x:80,y:40},{x:-60,y:-60}];
+$$('.mood-card').forEach((el,i)=>{
+  const o = moodOff[i] || {x:40,y:40};
+  tl.from(el, {x:o.x, y:o.y, autoAlpha:0, duration:.28, ease:'power2.out'}, 's6+='+(0.38+i*0.06));
+});
+tl.to(sections[5], {autoAlpha:0, duration:.21}, 's6+=1.15');
+
+/* s7 feature */
+tl.addLabel('s7', LABELS[6])
+  .to(sections[6], {autoAlpha:1, duration:.17}, 's7')
+  .from($$('.feature-grid-border'), {strokeDasharray:'0 2000', duration:.42, ease:'power1.out'}, 's7+=0.10')
+  .from($$('.feature-grid-line'), {autoAlpha:0, duration:.28}, 's7+=0.28')
+  .to($$('.feature-icon-path'), {strokeDashoffset:0, duration:.63, ease:'power1.inOut'}, 's7+=0.48')
+  .to($$('.feature-icon-dot'), {autoAlpha:1, scale:1.2, duration:.17, ease:'back.out(2)', transformOrigin:'center'}, 's7+=0.76')
+  .to($$('.feature-icon-dot'), {scale:1, duration:.11}, 's7+=0.84')
+  .from($$('.feature-label-wrap'), {autoAlpha:0, y:10, duration:.21}, 's7+=0.86')
+  .to(sections[6], {autoAlpha:0, duration:.21}, 's7+=1.15');
+
+/* s8 icons */
+tl.addLabel('s8', LABELS[7])
+  .to(sections[7], {autoAlpha:1, duration:.17}, 's8')
+  .from($$('.icon-card'), {autoAlpha:0, scale:.85, stagger:{each:.018, from:'center'}, duration:.28, ease:'power2.out'}, 's8+=0.12')
+  .from($$('.icons-brand-text'), {autoAlpha:0, scale:.9, duration:.35, ease:'power2.out'}, 's8+=0.42')
+  .to($$('.icons-row-0'), {x:'-260px', duration:1.3, ease:'none'}, 's8+=0.0')
+  .to($$('.icons-row-1'), {x:'200px', duration:1.3, ease:'none'}, 's8+=0.0')
+  .to($$('.icons-row-2'), {x:'-220px', duration:1.3, ease:'none'}, 's8+=0.0')
+  .to(sections[7], {autoAlpha:0, duration:.21}, 's8+=1.15');
+
+/* s9 outdoor */
+tl.addLabel('s9', LABELS[8])
+  .to(sections[8], {autoAlpha:1, duration:.17}, 's9')
+  .from($$('.outdoor-bg-0'), {autoAlpha:0, duration:.17}, 's9+=0.05');
+
+const STEP = .18;
+for(let e=0;e<5;e++){
+  const t = 's9+='+(0.15+e*STEP);
+  tl.fromTo($$('.outdoor-bg-'+e), {scale:1}, {scale:1.06, duration:STEP, ease:'none'}, t);
+  if(e<4){
+    tl.to($$('.outdoor-bg-'+e), {autoAlpha:0, duration:.07}, 's9+='+(0.29+e*STEP));
+    tl.from($$('.outdoor-bg-'+(e+1)), {autoAlpha:0, duration:.07}, 's9+='+(0.29+e*STEP));
+    tl.to($$('.outdoor-dot-'+e), {width:'6px', background:'rgba(245,245,243,0.3)', duration:.07}, 's9+='+(0.30+e*STEP));
+    tl.to($$('.outdoor-dot-'+(e+1)), {width:'20px', background:'#e01828', duration:.07}, 's9+='+(0.30+e*STEP));
+  }
+}
+tl.from($$('.outdoor-logo-wrap'), {autoAlpha:0, duration:.28}, 's9+=0.10')
+  .to(sections[8], {autoAlpha:0, duration:.21}, 's9+=1.15');
+
+/* s10 ip */
+tl.addLabel('s10', LABELS[9])
+  .to(sections[9], {autoAlpha:1, duration:.17}, 's10');
+$$('.ip-grid-line').forEach((el,i)=>tl.to(el, {strokeDashoffset:0, duration:.28, ease:'none'}, 's10+='+(0.06+i*0.10)));
+$$('.ip-grid-circle').forEach((el,i)=>tl.to(el, {strokeDashoffset:0, duration:.42, ease:'power1.inOut'}, 's10+='+(0.12+i*0.12)));
+$$('.ip-accent').forEach((el,i)=>tl.to(el, {strokeDashoffset:0, duration:.14, ease:'none'}, 's10+='+(0.30+i*0.07)));
+tl.to($$('.ip-char-i'), {y:'0%', duration:.56, ease:'power3.out'}, 's10+=0.34')
+  .to($$('.ip-char-p'), {y:'0%', duration:.56, ease:'power3.out'}, 's10+=0.44')
+  .to($$('.ip-tag-wrap'), {opacity:1, y:0, duration:.35, ease:'power2.out'}, 's10+=0.78')
+  .to($$('.ip-spec-corner'), {opacity:1, duration:.21}, 's10+=0.88')
+  .to(sections[9], {autoAlpha:0, duration:.21}, 's10+=1.15');
+
+/* s11 finale */
+tl.addLabel('s11', LABELS[10])
+  .to(sections[10], {autoAlpha:1, duration:.17}, 's11')
+  .to($$('.finale-ground'), {scaleX:1, duration:.35, ease:'power2.out'}, 's11+=0.05')
+  .to($$('.finale-deco-0'), {strokeDashoffset:0, duration:.42, ease:'none'}, 's11+=0.05');
+$$('.finale-letter-wrap').forEach((el,i)=>{
+  const h = parseFloat(el.dataset.h) || .9;
+  tl.to(el, {scaleY:h, duration:.56, ease:'power3.out'}, 's11+='+(0.22+i*0.06));
+});
+tl.to($$('.finale-tag-wrap'), {opacity:1, duration:.42, ease:'power2.out'}, 's11+=0.90');
+
+</script>
+</body>
+</html>
