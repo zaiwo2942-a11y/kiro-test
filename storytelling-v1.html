@@ -99,8 +99,9 @@ img{display:block;max-width:100%}
 }
 #vignette{
   position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.55) 100%);
-  mix-blend-mode:multiply;
+  background:
+    radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,.85) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.35), transparent 30%, transparent 70%, rgba(0,0,0,.55));
 }
 
 /* ---------- Header ---------- */
@@ -171,7 +172,8 @@ section{
 .hero h2{
   font-size:clamp(28px,4.5vw,68px);
   font-weight:400;letter-spacing:-.01em;line-height:1;
-  color:#dfe7ff;
+  color:#ffffff;
+  text-shadow:0 2px 30px rgba(0,0,0,.85), 0 0 60px rgba(0,0,0,.5);
 }
 .hero h2 i{
   font-family:var(--font-serif);font-style:italic;font-weight:400;
@@ -181,11 +183,14 @@ section{
   font-family:var(--font-serif);font-style:italic;font-weight:400;
   font-size:clamp(80px,18vw,260px);
   line-height:.9;letter-spacing:-.04em;
-  background:linear-gradient(180deg,#fffcff 0%,#e3f0ff 60%,#cebdf8 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  color:#ffffff;
   margin-top:-.05em;margin-left:-.04em;
   white-space:nowrap;
   transform:translateX(0);
+  text-shadow:
+    0 4px 20px rgba(0,0,0,.7),
+    0 8px 60px rgba(13,17,36,.95),
+    0 0 100px rgba(13,17,36,.6);
 }
 .hero h1 .char{display:inline-block;will-change:transform,opacity}
 .scroll-hint{
@@ -210,14 +215,17 @@ section{
   font-family:var(--font-serif);font-style:italic;font-weight:400;
   font-size:clamp(48px,9vw,160px);line-height:.95;letter-spacing:-.02em;
   text-align:center;
-  background:linear-gradient(180deg,#fff,#cdd9ff 60%,#9cc6ff);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  color:#ffffff;
+  text-shadow:
+    0 4px 20px rgba(0,0,0,.7),
+    0 8px 60px rgba(13,17,36,.95);
 }
 .chapter p.lead{
   margin-top:32px;
   max-width:560px;text-align:center;
   font-size:clamp(15px,1.3vw,18px);line-height:1.6;
-  opacity:.8;
+  color:#fff;opacity:.85;
+  text-shadow:0 2px 20px rgba(0,0,0,.7);
 }
 .chapter .group{display:flex;flex-direction:column;align-items:center}
 
@@ -258,10 +266,10 @@ section{
 .footer-section a.mail{
   font-family:var(--font-serif);font-style:italic;
   font-size:clamp(36px,6vw,86px);
-  background:linear-gradient(180deg,#fff,#cdd9ff);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  color:#ffffff;
   display:inline-block;
   transition:transform .4s ease;
+  text-shadow:0 4px 30px rgba(0,0,0,.6);
 }
 .footer-section a.mail:hover{transform:scale(1.02)}
 .footer-section .links{
@@ -579,8 +587,9 @@ bootWhenReady(() => {
     uCool:    {value:0},   // 0..1 ice intensity
     uForm:    {value:0},   // 0..1 how "assembled" the phoenix is
     uExplode: {value:0},   // 0..1 final dispersal
-    uSize:    {value: Math.min(devicePixelRatio,2) * 1.6},
+    uSize:    {value: Math.min(devicePixelRatio,2) * 1.2},
     uPointer: {value: new THREE.Vector2(0,0)},
+    uOpacity: {value: 0.55},
   };
 
   const vert = `
@@ -593,6 +602,7 @@ bootWhenReady(() => {
     uniform float uExplode;
     uniform float uSize;
     uniform vec2  uPointer;
+    uniform float uOpacity;
     varying vec3  vColor;
     varying float vGlow;
 
@@ -609,12 +619,14 @@ bootWhenReady(() => {
       vec3 base = position;
       float s = aSeed;
 
-      // dispersed/cloud shape: random sphere of radius ~3
+      // dispersed/cloud shape: random sphere — small, pulled to one side, NOT bleeding into the title
       vec3 cloud = vec3(
         (hash(s*13.1)-.5),
         (hash(s*23.7)-.5),
         (hash(s*7.9)-.5)
-      ) * 6.0;
+      ) * 3.0;
+      // bias the dispersed cloud upward and to the right so it doesn't sit on top of the hero text
+      cloud += vec3(2.2, 1.4, -1.0);
 
       // assemble: lerp from cloud → bird shape based on uForm
       vec3 pos = mix(cloud, base, smoothstep(0.0, 1.0, uForm));
@@ -655,21 +667,23 @@ bootWhenReady(() => {
   const frag = `
     varying vec3  vColor;
     varying float vGlow;
+    uniform float uOpacity;
     void main(){
       vec2 uv = gl_PointCoord - 0.5;
       float d = length(uv);
       if (d > 0.5) discard;
-      float alpha = smoothstep(0.5, 0.0, d);
-      // soft additive glow
-      vec3 c = vColor + vGlow * vec3(1.0,0.5,0.3);
-      gl_FragColor = vec4(c, alpha * 0.95);
+      // soft falloff with a small bright core
+      float alpha = pow(smoothstep(0.5, 0.0, d), 1.6);
+      vec3 c = vColor + vGlow * vec3(0.6,0.3,0.15);
+      // tone down so the cloud cannot blow out the screen
+      gl_FragColor = vec4(c * 0.65, alpha * uOpacity);
     }
   `;
 
   const mat = new THREE.ShaderMaterial({
     uniforms, vertexShader: vert, fragmentShader: frag,
     transparent:true, depthWrite:false,
-    blending: THREE.AdditiveBlending
+    blending: THREE.NormalBlending
   });
 
   const phoenix = new THREE.Points(geom, mat);
@@ -838,12 +852,16 @@ bootWhenReady(() => {
 
     camera.lookAt(0,0,0);
 
-    // body bg drift to match mood
+    // body bg drift to match mood — keep things DARK so text is readable
     const warm = uniforms.uWarm.value, cool = uniforms.uCool.value;
-    const r = Math.round( 13 + warm*30 - cool*5 );
-    const g = Math.round( 17 + warm*8  + cool*10 );
-    const b = Math.round( 36 - warm*8  + cool*40 );
+    const r = Math.round( 8  + warm*22 - cool*3 );
+    const g = Math.round( 10 + warm*5  + cool*8 );
+    const b = Math.round( 22 - warm*5  + cool*28 );
     document.body.style.background = `rgb(${r},${g},${b})`;
+
+    // particle opacity ramps with form: dispersed cloud is faint, assembled phoenix is bolder
+    const targetOpacity = 0.18 + Math.min(uniforms.uForm.value, 1.0) * 0.55;
+    uniforms.uOpacity.value += (targetOpacity - uniforms.uOpacity.value) * 0.08;
 
     renderer.render(scene, camera);
 
