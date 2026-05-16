@@ -1,278 +1,161 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
-<meta name="theme-color" content="#f8ede3"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="format-detection" content="telephone=no"/>
-<title>献给妈妈</title>
-<style>
-:root{--bg:#fdf8f4;--card:#ffffff;--rose:#c4727f;--rose-soft:#e8a0a8;--gold:#d4a574;--gold-soft:#e8caa4;--text:#3d2c2c;--text-light:#8b6f6f;--text-lighter:#b89e9e;--shadow:0 20px 60px rgba(60,30,30,.06);--radius:20px}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
-body{font-family:-apple-system,"SF Pro Display","PingFang SC","Noto Sans SC","Hiragino Sans GB",sans-serif;color:var(--text);background:var(--bg);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
-
-/* ===== 通用 ===== */
-.page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top,48px) 28px 60px;text-align:center;position:relative}
-.spacer{height:env(safe-area-inset-bottom,24px)}
-.fade-in{opacity:0;transform:translateY(24px);transition:opacity .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
-.fade-in.visible{opacity:1;transform:translateY(0)}
-.delay-1{transition-delay:.15s}.delay-2{transition-delay:.3s}.delay-3{transition-delay:.45s}.delay-4{transition-delay:.6s}
-
-/* ===== 导航点 ===== */
-.dots{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:12px}
-.dots span{display:block;width:6px;height:6px;border-radius:50%;background:var(--rose-soft);opacity:.4;transition:all .4s}
-.dots span.on{opacity:1;background:var(--rose);transform:scale(1.6)}
-
-/* ===== 1. 封面 ===== */
-.cover{background:linear-gradient(180deg,#fdf8f4 0%,#faf0ea 100%)}
-.cover-label{font-size:11px;letter-spacing:6px;color:var(--text-lighter);text-transform:uppercase;margin-bottom:20px}
-.cover-title{font-size:56px;font-weight:200;letter-spacing:-1px;color:var(--rose);line-height:1.15;margin-bottom:16px}
-.cover-sub{font-size:15px;color:var(--text-light);letter-spacing:1px;max-width:260px;margin-bottom:40px}
-.cover-seal{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--rose-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;box-shadow:0 12px 32px rgba(196,114,127,.35);cursor:pointer;transition:transform .3s,box-shadow .3s;-webkit-touch-callout:none;user-select:none}
-.cover-seal:active{transform:scale(.9);box-shadow:0 6px 16px rgba(196,114,127,.3)}
-.cover-seal.opened{animation:sealOut .6s forwards}
-@keyframes sealOut{to{transform:scale(0) rotate(180deg);opacity:0}}
-.cover-hint{position:absolute;bottom:28px;font-size:12px;color:var(--text-lighter);letter-spacing:3px;animation:gentle 2.5s ease-in-out infinite}
-@keyframes gentle{0%,100%{opacity:.6;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
-
-/* ===== 2. 祝福 ===== */
-.wish{background:linear-gradient(180deg,#faf0ea 0%,#fdf5ef 100%)}
-.wish-card{width:100%;max-width:340px;padding:48px 28px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
-.wish-text{font-size:24px;font-weight:300;color:var(--text);line-height:1.8;letter-spacing:1px;min-height:100px}
-.wish-text .cursor{display:inline-block;width:2px;height:24px;background:var(--rose);margin-left:2px;animation:blink .9s step-end infinite;vertical-align:text-bottom}
-.wish-text.done .cursor{display:none}
-.wish-from{margin-top:28px;font-size:13px;color:var(--text-lighter);letter-spacing:3px;opacity:0;transition:opacity .8s .3s}
-.wish-text.done~.wish-from{opacity:1}
-
-/* ===== 3. 优点 ===== */
-.virtues{background:linear-gradient(180deg,#fdf5ef 0%,#faf0ea 100%)}
-.v-title{font-size:28px;font-weight:200;color:var(--text);letter-spacing:2px;margin-bottom:6px}
-.v-sub{font-size:13px;color:var(--text-lighter);letter-spacing:2px;margin-bottom:32px}
-.v-list{display:flex;flex-direction:column;gap:14px;width:100%;max-width:340px}
-.v-item{background:var(--card);border-radius:16px;padding:22px 20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform .3s,box-shadow .3s;overflow:hidden;position:relative}
-.v-item:active{transform:scale(.97)}
-.v-item .icon{font-size:32px;flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fdf0ec,#fce8e0);border-radius:14px}
-.v-item .info{text-align:left;flex:1}
-.v-item .info h3{font-size:16px;font-weight:500;color:var(--text);margin-bottom:3px;letter-spacing:.5px}
-.v-item .info p{font-size:12px;color:var(--text-light);line-height:1.5;max-height:0;overflow:hidden;transition:max-height .5s,opacity .4s;opacity:0}
-.v-item.open .info p{max-height:80px;opacity:1}
-.v-item::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;border-right:1.5px solid var(--text-lighter);border-bottom:1.5px solid var(--text-lighter);transform:translateY(-50%) rotate(45deg);transition:transform .3s}
-.v-item.open::after{transform:translateY(-50%) rotate(-135deg)}
-
-/* ===== 4. 时光 ===== */
-.timeline-sec{background:linear-gradient(180deg,#faf0ea 0%,#fdf5ef 100%)}
-.tl-title{font-size:28px;font-weight:200;color:var(--text);letter-spacing:2px;margin-bottom:6px}
-.tl-sub{font-size:13px;color:var(--text-lighter);letter-spacing:2px;margin-bottom:28px}
-.tl{display:flex;flex-direction:column;gap:0;width:100%;max-width:320px;position:relative;padding-left:24px}
-.tl::before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:1.5px;background:linear-gradient(180deg,var(--gold-soft),var(--rose-soft));border-radius:1px}
-.tl-item{position:relative;padding:14px 0}
-.tl-item::before{content:"";position:absolute;left:-20px;top:20px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--rose-soft);transition:background .3s,border-color .3s}
-.tl-item.on::before{background:var(--rose);border-color:var(--rose)}
-.tl-item h4{font-size:13px;font-weight:600;color:var(--gold);letter-spacing:2px;margin-bottom:4px}
-.tl-item p{font-size:14px;color:var(--text-light);line-height:1.7;letter-spacing:.3px}
-
-/* ===== 5. 花朵 ===== */
-.bloom-sec{background:linear-gradient(180deg,#fdf5ef 0%,#faf0ea 100%)}
-.bloom-wrap{position:relative;width:200px;height:200px;margin-bottom:28px}
-.bloom-wrap .petal{position:absolute;top:50%;left:50%;width:40px;height:64px;margin:-48px 0 0 -20px;background:linear-gradient(180deg,var(--rose-soft) 0%,var(--rose) 100%);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;transform-origin:center 48px;opacity:0;transform:rotate(var(--r)) scale(0);transition:all 1.2s cubic-bezier(.34,1.56,.64,1)}
-.bloom-wrap.bloom .petal{opacity:.85;transform:rotate(var(--r)) scale(1)}
-.bloom-wrap .p1{--r:0deg;transition-delay:0s}.bloom-wrap .p2{--r:45deg;transition-delay:.08s}
-.bloom-wrap .p3{--r:90deg;transition-delay:.16s}.bloom-wrap .p4{--r:135deg;transition-delay:.24s}
-.bloom-wrap .p5{--r:180deg;transition-delay:.32s}.bloom-wrap .p6{--r:225deg;transition-delay:.4s}
-.bloom-wrap .p7{--r:270deg;transition-delay:.48s}.bloom-wrap .p8{--r:315deg;transition-delay:.56s}
-.bloom-wrap .core{position:absolute;top:50%;left:50%;width:28px;height:28px;margin:-14px 0 0 -14px;background:radial-gradient(circle,#ffedc2,var(--gold));border-radius:50%;box-shadow:0 0 20px rgba(212,165,116,.4);opacity:0;transform:scale(0);transition:all .6s .7s cubic-bezier(.34,1.56,.64,1)}
-.bloom-wrap.bloom .core{opacity:1;transform:scale(1)}
-
-/* ===== 6. 结尾 ===== */
-.finale{background:linear-gradient(180deg,#faf0ea 0%,#fdf8f4 100%)}
-.finale-msg{font-size:36px;font-weight:200;color:var(--rose);line-height:1.4;letter-spacing:1px;margin-bottom:12px}
-.finale-sub{font-size:14px;color:var(--text-light);max-width:280px;line-height:1.7;letter-spacing:.5px;margin-bottom:32px}
-.finale-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;font-size:14px;font-family:inherit;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,var(--rose),var(--rose-soft));border:none;border-radius:50px;box-shadow:0 12px 28px rgba(196,114,127,.3);cursor:pointer;transition:transform .2s;touch-action:manipulation}
-.finale-btn:active{transform:scale(.95)}
-.finale-sign{margin-top:36px;font-size:12px;color:var(--text-lighter);letter-spacing:3px}
-
-/* 爱心飞出 */
-.hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
-.hearts span{position:absolute;bottom:-20px;font-size:20px;animation:rise 3.5s ease-out forwards;will-change:transform}
-@keyframes rise{0%{transform:translateY(0) scale(.4);opacity:0}10%{opacity:.9}100%{transform:translateY(-105vh) scale(1.2) rotate(360deg);opacity:0}}
-
-/* ===== 响应式 ===== */
-@media(min-width:390px){.cover-title{font-size:62px}.finale-msg{font-size:40px}}
-@media(min-width:600px){.cover-title{font-size:76px}.wish-text{font-size:30px}.v-title,.tl-title{font-size:34px}.finale-msg{font-size:48px}.v-list,.tl{max-width:420px}.wish-card{max-width:440px;padding:60px 36px}}
-@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPIN A TALE — 紡ぐ物語 | 仿 ivress 风格动画</title>
+  <meta name="description" content="一个仿 brand.ivress.co.jp 的滚动叙事动画页面" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-<!-- 导航 -->
-<nav class="dots" id="dots"><span></span><span></span><span></span><span></span><span></span><span></span></nav>
+<body class="is-loading">
 
-<!-- 1. 封面 -->
-<section class="page cover" id="p1">
-<div class="cover-label fade-in">FROM 李圳</div>
-<h1 class="cover-title fade-in delay-1">母亲节<br>快乐</h1>
-<p class="cover-sub fade-in delay-2">这是一封写给您的信<br>请慢慢打开</p>
-<div class="cover-seal fade-in delay-3" id="seal">❤</div>
-<div class="cover-hint">轻触打开</div>
-</section>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-content">
+      <button class="sound-toggle" id="soundToggle" aria-pressed="false">
+        <span class="sound-label">SOUND</span>
+        <span class="sound-icon">
+          <span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span>
+        </span>
+      </button>
+      <a href="#" class="lang-switch">EN</a>
+    </div>
+  </header>
 
-<!-- 2. 祝福 -->
-<section class="page wish" id="p2">
-<div class="wish-card fade-in">
-<div class="wish-text" id="wishText"><span class="cursor"></span></div>
-<div class="wish-from">—— 李圳</div>
-</div>
-</section>
+  <!-- Loader -->
+  <div id="loader" class="loader-wrap" aria-label="Loading">
+    <div class="loader-ring"></div>
+    <div class="loader-num"><span id="loaderValue">00</span><span class="percent">%</span></div>
+  </div>
 
-<!-- 3. 妈妈的优点 -->
-<section class="page virtues" id="p3">
-<div class="v-title fade-in">妈妈的样子</div>
-<div class="v-sub fade-in delay-1">在我心里，您是这样的</div>
-<div class="v-list">
-<div class="v-item fade-in delay-1"><div class="icon">🍲</div><div class="info"><h3>做饭超好吃</h3><p>世界上最好的味道，是从您厨房飘出的香气。无论走到哪里，都忘不了那个味道。</p></div></div>
-<div class="v-item fade-in delay-2"><div class="icon">💛</div><div class="info"><h3>永远支持我</h3><p>无论我选什么路，您都说"有妈呢"。您让我永远有勇气，去做想做的事。</p></div></div>
-<div class="v-item fade-in delay-3"><div class="icon">🌿</div><div class="info"><h3>总把我放第一</h3><p>好吃的永远留给我，好看的永远让给我。您把自己排到了最后一位。</p></div></div>
-<div class="v-item fade-in delay-4"><div class="icon">☎️</div><div class="info"><h3>情不自禁为我操心</h3><p>天冷加衣、吃饭别凑合、晚上早点睡。那些唠叨，是最珍贵的挂念。</p></div></div>
-</div>
-</section>
+  <main id="main" class="main">
 
-<!-- 4. 时光 -->
-<section class="page timeline-sec" id="p4">
-<div class="tl-title fade-in">我们的时光</div>
-<div class="tl-sub fade-in delay-1">那些平凡又珍贵的日子</div>
-<div class="tl fade-in delay-2">
-<div class="tl-item"><h4>小时候</h4><p>您一口一口喂我长大，一步一步教我走路。那时觉得您的手好大，抱我轻而易举。</p></div>
-<div class="tl-item"><h4>生病的夜晚</h4><p>凌晨三点的额头温度、温水、药片。您说"没事，妈在"，那句话胜过世间所有解药。</p></div>
-<div class="tl-item"><h4>读书时</h4><p>深夜的灯、清晨的饭、书包里悄悄塞的零花钱。您爱得很安静，很克制。</p></div>
-<div class="tl-item"><h4>离家远行</h4><p>每一次您目送我走，我不敢回头。因为回头的话，您会哭，我也会。</p></div>
-<div class="tl-item"><h4>电话那头</h4><p>吃饱穿暖、别太累、想你了。我每次说"我挺好"——听到您声音就真的好了。</p></div>
-<div class="tl-item"><h4>现在</h4><p>轮到我来照顾您了。这辈子做您的孩子，真的很幸福。</p></div>
-</div>
-</section>
+    <!-- Prologue letters -->
+    <div class="prologue fixed-full" id="prologue">
+      <p class="prologue-text">
+        <span class="letter" data-delay="4">这</span><span class="letter" data-delay="0">是</span><span class="letter" data-delay="6">一</span><span class="letter" data-delay="8">个</span><span class="letter" data-delay="2">拒</span><span class="letter" data-delay="4">绝</span><span class="letter" data-delay="1">光</span><span class="letter" data-delay="6">明</span><span class="letter" data-delay="5">的</span><span class="letter" data-delay="0">世界</span>
+      </p>
+    </div>
 
-<!-- 5. 花朵 -->
-<section class="page bloom-sec" id="p5">
-<div class="bloom-wrap" id="bloomWrap">
-<div class="petal p1"></div><div class="petal p2"></div><div class="petal p3"></div><div class="petal p4"></div>
-<div class="petal p5"></div><div class="petal p6"></div><div class="petal p7"></div><div class="petal p8"></div>
-<div class="core"></div>
-</div>
-<div class="v-title fade-in">这朵花送给您</div>
-<div class="v-sub fade-in delay-1">愿您如花般绽放，被世界温柔以待</div>
-</section>
+    <!-- Title -->
+    <section class="title-screen fixed-full" id="titleScreen">
+      <h1 class="main-title">
+        <span class="mt-row">
+          <span class="split-text mt-above">
+            <span class="split-char" style="--i:0">A</span>
+            <span class="split-char split-space" style="--i:1">&nbsp;</span>
+            <span class="split-char" style="--i:2">B</span>
+            <span class="split-char" style="--i:3">R</span>
+            <span class="split-char" style="--i:4">A</span>
+            <span class="split-char" style="--i:5">N</span>
+            <span class="split-char" style="--i:6">D</span>
+            <span class="split-char split-space" style="--i:7">&nbsp;</span>
+            <span class="split-char" style="--i:8">S</span>
+            <span class="split-char" style="--i:9">T</span>
+            <span class="split-char" style="--i:10">O</span>
+            <span class="split-char" style="--i:11">R</span>
+            <span class="split-char" style="--i:12">Y</span>
+          </span>
+        </span>
+        <span class="mt-row">
+          <span class="split-text mt-below">
+            <span class="split-char" style="--i:0">S</span>
+            <span class="split-char" style="--i:1">P</span>
+            <span class="split-char" style="--i:2">I</span>
+            <span class="split-char" style="--i:3">N</span>
+            <span class="split-char split-space" style="--i:4">&nbsp;</span>
+            <span class="split-char" style="--i:5">A</span>
+            <span class="split-char split-space" style="--i:6">&nbsp;</span>
+            <span class="split-char" style="--i:7">T</span>
+            <span class="split-char" style="--i:8">A</span>
+            <span class="split-char" style="--i:9">L</span>
+            <span class="split-char" style="--i:10">E</span>
+          </span>
+        </span>
+      </h1>
+      <p class="main-subtitle">
+        <span class="subtitle-char" style="--i:0">紡</span>
+        <span class="subtitle-char" style="--i:1">ぐ</span>
+        <span class="subtitle-char" style="--i:2">物</span>
+        <span class="subtitle-char" style="--i:3">語</span>
+      </p>
 
-<!-- 6. 结尾 -->
-<section class="page finale" id="p6">
-<div class="finale-msg fade-in">妈妈<br>我爱你</div>
-<p class="finale-sub fade-in delay-1">愿您永远健康、开心<br>被岁月温柔以待</p>
-<button class="finale-btn fade-in delay-2" id="heartBtn">❤ 送您一颗心</button>
-<div class="finale-sign fade-in delay-3">您的儿子 李圳 · 母亲节</div>
-</section>
+      <button class="start-button" id="startButton" aria-label="Start the story">
+        <span class="ripple"></span>
+        <span class="ripple-cover"></span>
+        <span class="sb-text">
+          <span class="sb-line">CLICK TO</span>
+          <span class="sb-line strong">START</span>
+        </span>
+      </button>
+    </section>
 
-<div class="hearts" id="hearts"></div>
+    <!-- Scroll-driven story -->
+    <div class="story" id="story">
 
-<script>
-(function(){
-  /* --- 工具 --- */
-  var pages = document.querySelectorAll('.page');
-  var dots = document.querySelectorAll('.dots span');
+      <section class="story-section" data-section="1">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="2">旅</span><span class="letter" data-delay="3">人</span><span class="letter" data-delay="7">，</span><br/>
+            <span class="letter" data-delay="2">在</span><span class="letter" data-delay="5">世</span><span class="letter" data-delay="7">界</span><span class="letter" data-delay="2">的</span><span class="letter" data-delay="8">边</span><span class="letter" data-delay="8">缘</span><span class="letter" data-delay="0">徘</span><span class="letter" data-delay="9">徊</span>
+          </p>
+        </div>
+      </section>
 
-  /* --- 淡入观察 --- */
-  var fadeEls = document.querySelectorAll('.fade-in');
-  var fadeOb = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); fadeOb.unobserve(e.target); }});
-  },{threshold:.15});
-  fadeEls.forEach(function(el){ fadeOb.observe(el); });
+      <section class="story-section" data-section="2">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="7">他</span><span class="letter" data-delay="6">遇</span><span class="letter" data-delay="4">见</span><span class="letter" data-delay="1">了</span><span class="letter" data-delay="2">无</span><span class="letter" data-delay="2">名</span><span class="letter" data-delay="1">之</span><span class="letter" data-delay="3">人</span><br/>
+            <span class="letter" data-delay="8">背</span><span class="letter" data-delay="8">影</span><span class="letter" data-delay="1">里</span><span class="letter" data-delay="2">藏</span><span class="letter" data-delay="9">着</span><span class="letter" data-delay="8">摇</span><span class="letter" data-delay="9">曳</span><span class="letter" data-delay="6">的</span><span class="letter" data-delay="5">阴</span><span class="letter" data-delay="2">影</span>
+          </p>
+        </div>
+      </section>
 
-  /* --- 导航点 --- */
-  var secOb = new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if(e.isIntersecting){
-        var i = Array.prototype.indexOf.call(pages, e.target);
-        dots.forEach(function(d,j){ d.classList.toggle('on', i===j); });
-      }
-    });
-  },{threshold:.5});
-  pages.forEach(function(p){ secOb.observe(p); });
-  dots.forEach(function(d,i){
-    d.addEventListener('click',function(){ pages[i].scrollIntoView({behavior:'smooth'}); });
-  });
+      <section class="story-section" data-section="3">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="0">旅</span><span class="letter" data-delay="8">人</span><span class="letter" data-delay="3">释</span><span class="letter" data-delay="4">放</span><span class="letter" data-delay="8">了</span><span class="letter" data-delay="0">光</span><span class="letter" data-delay="3">，</span><span class="letter" data-delay="3">驱</span><span class="letter" data-delay="9">散</span><span class="letter" data-delay="5">阴</span><span class="letter" data-delay="6">霾</span><br/>
+            <span class="letter" data-delay="6">为</span><span class="letter" data-delay="3">他</span><span class="letter" data-delay="8">点</span><span class="letter" data-delay="4">燃</span><span class="letter" data-delay="0">勇</span><span class="letter" data-delay="1">气</span>
+          </p>
+        </div>
+      </section>
 
-  /* --- 封面印章 --- */
-  var seal = document.getElementById('seal');
-  var sealDone = false;
-  seal.addEventListener('click',function(){
-    if(sealDone) return; sealDone = true;
-    seal.classList.add('opened');
-    setTimeout(function(){ document.getElementById('p2').scrollIntoView({behavior:'smooth'}); },700);
-  });
+      <section class="story-section" data-section="4">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="3">「</span><span class="letter" data-delay="0">我</span><span class="letter" data-delay="0">也</span><span class="letter" data-delay="8">想</span><span class="letter" data-delay="7">成</span><span class="letter" data-delay="4">为</span><span class="letter" data-delay="9">某</span><span class="letter" data-delay="5">个</span><span class="letter" data-delay="2">人</span><span class="letter" data-delay="4">」</span><br/>
+            <span class="letter" data-delay="7">微</span><span class="letter" data-delay="0">小</span><span class="letter" data-delay="8">的</span><span class="letter" data-delay="0">芽</span><span class="letter" data-delay="8">，</span><span class="letter" data-delay="6">在</span><span class="letter" data-delay="1">心</span><span class="letter" data-delay="7">底</span><span class="letter" data-delay="2">绽</span><span class="letter" data-delay="8">放</span>
+          </p>
+        </div>
+      </section>
 
-  /* --- 打字机 --- */
-  var wishEl = document.getElementById('wishText');
-  var wishText = '献给世界上最好的妈妈，\n妈妈我爱你。';
-  var wishStarted = false;
-  var wishOb = new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if(e.isIntersecting && !wishStarted){
-        wishStarted = true;
-        var i = 0;
-        var t = setInterval(function(){
-          var ch = wishText[i];
-          if(ch==='\n') wishEl.insertBefore(document.createElement('br'), wishEl.querySelector('.cursor'));
-          else wishEl.insertBefore(document.createTextNode(ch), wishEl.querySelector('.cursor'));
-          i++;
-          if(i>=wishText.length){ clearInterval(t); wishEl.classList.add('done'); }
-        },160);
-      }
-    });
-  },{threshold:.4});
-  wishOb.observe(document.getElementById('p2'));
+      <!-- Final climax: gradient letters -->
+      <section class="story-section final-section" data-section="5">
+        <div class="ss-inner">
+          <p class="story-text final-text">
+            <span class="letter" data-delay="2" style="color:#feedb5">—</span><span class="letter" data-delay="4" style="color:#feeaaa">逆</span><span class="letter" data-delay="0" style="color:#fee79f">境</span><span class="letter" data-delay="4" style="color:#fee594">是</span><span class="letter" data-delay="3" style="color:#fee289">进</span><span class="letter" data-delay="9" style="color:#fedf7e">化</span><span class="letter" data-delay="9" style="color:#ffdc74">的</span><span class="letter" data-delay="0" style="color:#ffd969">养</span><span class="letter" data-delay="3" style="color:#ffd65e">分</span><span class="letter" data-delay="5" style="color:#ffd453">—</span><br/>
+            <span class="letter" data-delay="7" style="color:#feedb5">受</span><span class="letter" data-delay="0" style="color:#feebae">伤</span><span class="letter" data-delay="3" style="color:#fee9a6">、</span><span class="letter" data-delay="2" style="color:#fee79f">跌</span><span class="letter" data-delay="1" style="color:#fee597">倒</span><span class="letter" data-delay="0" style="color:#fee390">、</span><span class="letter" data-delay="1" style="color:#fee188">迷</span><span class="letter" data-delay="9" style="color:#fedf81">惘</span><span class="letter" data-delay="1" style="color:#ffde79">；</span><br/>
+            <span class="letter" data-delay="9" style="color:#ffdc72">每</span><span class="letter" data-delay="9" style="color:#ffda6a">一</span><span class="letter" data-delay="0" style="color:#ffd863">次</span><span class="letter" data-delay="3" style="color:#ffd65b">，</span><span class="letter" data-delay="0" style="color:#ffd454">都</span><span class="letter" data-delay="3" style="color:#ffd24c">让</span><span class="letter" data-delay="0" style="color:#ffd045">我</span><span class="letter" data-delay="4" style="color:#ffce3d">们</span><span class="letter" data-delay="2" style="color:#ffcb35">更</span><span class="letter" data-delay="6" style="color:#ffc92e">强</span>
+          </p>
+          <p class="final-credit">— SPIN A TALE —</p>
+          <button class="restart" id="restart">RESTART</button>
+        </div>
+      </section>
 
-  /* --- 优点展开 --- */
-  document.querySelectorAll('.v-item').forEach(function(item){
-    item.addEventListener('click',function(){
-      // 关闭其他
-      document.querySelectorAll('.v-item.open').forEach(function(o){ if(o!==item) o.classList.remove('open'); });
-      item.classList.toggle('open');
-    });
-  });
+    </div>
 
-  /* --- 时光轴逐个显示 --- */
-  var tlItems = document.querySelectorAll('.tl-item');
-  var tlOb = new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add('on'); tlOb.unobserve(e.target); }
-    });
-  },{threshold:.3});
-  tlItems.forEach(function(it){ tlOb.observe(it); });
+    <!-- Scroll hint -->
+    <div class="scroll-hint" id="scrollHint" aria-hidden="true">
+      <span>SCROLL</span>
+      <span class="arrow"></span>
+      <span class="arrow"></span>
+      <span class="arrow"></span>
+    </div>
 
-  /* --- 花朵绽放 --- */
-  var bloom = document.getElementById('bloomWrap');
-  var bloomOb = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ bloom.classList.add('bloom'); bloomOb.disconnect(); }});
-  },{threshold:.4});
-  bloomOb.observe(bloom);
+  </main>
 
-  /* --- 送爱心 --- */
-  document.getElementById('heartBtn').addEventListener('click',function(){
-    var layer = document.getElementById('hearts');
-    var emojis = ['❤','💕','💖','🌸','✨','🌷'];
-    for(var i=0;i<30;i++){
-      (function(i){
-        setTimeout(function(){
-          var s = document.createElement('span');
-          s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-          s.style.left = Math.random()*100+'vw';
-          s.style.fontSize = (16+Math.random()*20)+'px';
-          s.style.animationDuration = (2.5+Math.random()*2)+'s';
-          layer.appendChild(s);
-          setTimeout(function(){s.remove();},5000);
-        },i*70);
-      })(i);
-    }
-  });
-})();
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
