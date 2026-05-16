@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Storytelling — a Noomo-style demo</title>
+<meta name="description" content="A scroll-driven 3D storytelling demo, inspired by storytelling.noomoagency.com" />
+
+<!-- Fonts: free serif italic + clean sans, close in spirit to TheSeasons + TTNeoris -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --c-black:#1d2440;
+  --c-deep:#0d1124;
+  --c-blue:#3762be;
+  --c-rose:#eabdf6;
+  --c-warm:#ffb38a;
+  --c-cool:#9cc6ff;
+  --c-white:#f5f5f5;
+  --bg:#0d1124;
+  --fg:#f5f5f5;
+  --font-serif:"DM Serif Display", "TheSeasons", Georgia, serif;
+  --font-sans:"Inter", "TTNeoris", system-ui, sans-serif;
+  --reveal:0vmax;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);overflow-x:hidden}
+body{cursor:none}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+
+/* ---------- Preloader ---------- */
+#preloader{
+  position:fixed;inset:0;z-index:1000;
+  background:linear-gradient(45deg,#cebdf8,#e2dbf8);
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:auto;
+  transition:opacity .6s ease;
+}
+#preloader.revealing{
+  -webkit-mask-image:radial-gradient(circle at center,
+    transparent 0,
+    transparent calc(var(--reveal) - 14vmax),
+    rgba(0,0,0,.34) calc(var(--reveal) - 8vmax),
+    rgba(0,0,0,.72) calc(var(--reveal) - 3vmax),
+    #000 var(--reveal),
+    #000 100%);
+          mask-image:radial-gradient(circle at center,
+    transparent 0,
+    transparent calc(var(--reveal) - 14vmax),
+    rgba(0,0,0,.34) calc(var(--reveal) - 8vmax),
+    rgba(0,0,0,.72) calc(var(--reveal) - 3vmax),
+    #000 var(--reveal),
+    #000 100%);
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+}
+#preloader .pl-inner{
+  display:flex;flex-direction:column;align-items:center;gap:18px;
+  color:#1d2440;
+}
+#preloader .ring{
+  width:54px;height:54px;border-radius:50%;
+  border:1.5px solid #1d2440;
+  border-top-color:transparent;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#preloader .pl-text{font-family:var(--font-serif);font-style:italic;font-size:24px}
+
+/* ---------- Custom cursor ---------- */
+.cursor{
+  position:fixed;top:0;left:0;width:18px;height:18px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.85);
+  pointer-events:none;z-index:900;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+  transition:width .25s ease, height .25s ease, background .25s ease;
+}
+.cursor.hover{width:54px;height:54px;background:rgba(255,255,255,.12)}
+.cursor-dot{
+  position:fixed;top:0;left:0;width:4px;height:4px;border-radius:50%;
+  background:#fff;pointer-events:none;z-index:900;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+}
+@media (pointer:coarse){
+  body{cursor:auto}
+  .cursor,.cursor-dot{display:none}
+}
+
+/* ---------- WebGL canvas: full-screen, fixed, behind everything ---------- */
+#scene{
+  position:fixed;inset:0;z-index:0;
+  width:100vw;height:100vh;
+  pointer-events:none;
+}
+#vignette{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.55) 100%);
+  mix-blend-mode:multiply;
+}
+
+/* ---------- Header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:30;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:24px 40px;
+  font-size:14px;letter-spacing:.04em;
+  pointer-events:none;
+}
+header > *{pointer-events:auto}
+.logo{
+  font-family:var(--font-serif);font-style:italic;font-size:22px;
+  letter-spacing:.02em;
+}
+.logo b{font-style:normal;font-family:var(--font-sans);font-weight:600}
+nav.top{display:flex;gap:6px}
+nav.top a{
+  padding:6px 12px;border-radius:999px;
+  transition:background .25s ease;
+  font-size:14px;
+}
+nav.top a:hover{background:rgba(255,255,255,.12)}
+
+/* ---------- Release Spirit floating button ---------- */
+.spirit{
+  position:fixed;right:32px;bottom:32px;z-index:25;
+  display:flex;align-items:center;gap:10px;
+  padding:10px 20px 10px 14px;
+  background:rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.4);
+  font-size:14px;color:#fff;
+  cursor:none;
+  transition:transform .35s ease, background .35s ease;
+}
+.spirit:hover{transform:translateY(-3px);background:rgba(234,189,246,.35)}
+.spirit .bird{
+  width:22px;height:22px;display:inline-block;
+  background:radial-gradient(circle at 35% 40%, #fff 30%, #eabdf6 70%, transparent 71%);
+  border-radius:50%;filter:blur(.4px);
+}
+.spirit .letters{display:inline-flex;gap:1px;font-weight:500}
+.spirit .letters span{display:inline-block;transition:transform .3s ease, color .3s ease}
+.spirit:hover .letters span{color:#fff}
+
+/* ---------- Sections ---------- */
+main{position:relative;z-index:10}
+section{
+  min-height:100vh;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  padding:120px 8vw;
+}
+.chapter-num{
+  position:absolute;top:48px;left:40px;
+  font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+  opacity:.55;
+}
+
+/* HERO */
+.hero{min-height:100vh}
+.hero .wrap{
+  width:100%;display:flex;flex-direction:column;align-items:flex-start;
+  margin-left:6vw;
+}
+.hero h2{
+  font-size:clamp(28px,4.5vw,68px);
+  font-weight:400;letter-spacing:-.01em;line-height:1;
+  color:#dfe7ff;
+}
+.hero h2 i{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;
+  margin:0 .15em;color:#eabdf6;
+}
+.hero h1{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;
+  font-size:clamp(80px,18vw,260px);
+  line-height:.9;letter-spacing:-.04em;
+  background:linear-gradient(180deg,#fffcff 0%,#e3f0ff 60%,#cebdf8 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-top:-.05em;margin-left:-.04em;
+  white-space:nowrap;
+  transform:translateX(0);
+}
+.hero h1 .char{display:inline-block;will-change:transform,opacity}
+.scroll-hint{
+  position:fixed;left:50%;bottom:36px;transform:translateX(-50%);
+  z-index:20;font-size:13px;letter-spacing:.25em;text-transform:uppercase;
+  opacity:.7;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  transition:opacity .4s ease;
+}
+.scroll-hint .bar{
+  width:1px;height:38px;background:linear-gradient(to bottom,#fff,transparent);
+  animation:drop 1.6s ease-in-out infinite;
+}
+@keyframes drop{
+  0%{transform:translateY(-12px);opacity:0}
+  40%{opacity:1}
+  100%{transform:translateY(12px);opacity:0}
+}
+
+/* CHAPTERS — typography-led */
+.chapter h3{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;
+  font-size:clamp(48px,9vw,160px);line-height:.95;letter-spacing:-.02em;
+  text-align:center;
+  background:linear-gradient(180deg,#fff,#cdd9ff 60%,#9cc6ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.chapter p.lead{
+  margin-top:32px;
+  max-width:560px;text-align:center;
+  font-size:clamp(15px,1.3vw,18px);line-height:1.6;
+  opacity:.8;
+}
+.chapter .group{display:flex;flex-direction:column;align-items:center}
+
+/* CASES strip */
+.cases{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:24px;width:100%;max-width:1200px;
+}
+.case{
+  position:relative;aspect-ratio:4/5;border-radius:18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:22px;
+  transition:transform .5s ease, border-color .5s ease;
+  cursor:none;
+}
+.case:hover{transform:translateY(-6px);border-color:rgba(234,189,246,.6)}
+.case .label{font-size:11px;letter-spacing:.3em;text-transform:uppercase;opacity:.55}
+.case .name{font-family:var(--font-serif);font-style:italic;font-size:34px;margin-top:6px}
+.case::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(60% 60% at 30% 20%,var(--accent,#eabdf6) 0,transparent 70%);
+  opacity:.45;
+}
+
+/* FOOTER */
+.footer-section{
+  min-height:100vh;text-align:center;
+  background:linear-gradient(180deg,transparent,#0a0e1c 60%);
+}
+.footer-section h2{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;
+  font-size:clamp(28px,3vw,44px);line-height:1.2;
+  max-width:780px;margin:0 auto 40px;
+}
+.footer-section a.mail{
+  font-family:var(--font-serif);font-style:italic;
+  font-size:clamp(36px,6vw,86px);
+  background:linear-gradient(180deg,#fff,#cdd9ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:inline-block;
+  transition:transform .4s ease;
+}
+.footer-section a.mail:hover{transform:scale(1.02)}
+.footer-section .links{
+  margin-top:80px;display:flex;gap:40px;justify-content:center;
+  font-size:14px;opacity:.7;
+}
+.footer-section .colophon{
+  margin-top:30px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;
+  opacity:.4;
+}
+
+/* generic split-text styles */
+.split .word{display:inline-block;overflow:hidden;vertical-align:bottom}
+.split .word .inner{display:inline-block;will-change:transform,opacity}
+
+/* tiny utility */
+.fade-up{opacity:0;transform:translateY(40px)}
+</style>
+</head>
+<body>
+
+<!-- preloader -->
+<div id="preloader">
+  <div class="pl-inner">
+    <div class="ring"></div>
+    <div class="pl-text">summoning the spirit…</div>
+  </div>
+</div>
+
+<!-- custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- WebGL scene canvas -->
+<canvas id="scene"></canvas>
+<div id="vignette"></div>
+
+<!-- Header -->
+<header>
+  <a class="logo" href="#"><b>noomo</b><i>·</i>storytelling</a>
+  <nav class="top">
+    <a href="#">Agency</a>
+    <a href="#">Labs</a>
+    <a href="#footer">Contact</a>
+  </nav>
+</header>
+
+<!-- Release spirit floating button -->
+<button class="spirit" id="spirit" aria-label="Reimagine Phoenix">
+  <span class="bird"></span>
+  <span class="letters" id="spiritLetters">
+    <span>R</span><span>e</span><span>i</span><span>m</span><span>a</span><span>g</span><span>i</span><span>n</span><span>e</span>
+    <span>&nbsp;</span>
+    <span>P</span><span>h</span><span>o</span><span>e</span><span>n</span><span>i</span><span>x</span>
+  </span>
+</button>
+
+<!-- Scroll hint -->
+<div class="scroll-hint" id="scrollHint">
+  <span>Scroll to explore</span>
+  <span class="bar"></span>
+</div>
+
+<main>
+
+<!-- HERO -->
+<section class="hero" data-chapter="0" data-color-warm="0" data-color-cool="0">
+  <div class="wrap">
+    <h2 data-split-words>The power <i>of</i> digital</h2>
+    <h1 id="heroTitle">storytelling</h1>
+  </div>
+</section>
+
+<!-- CHAPTER 1: THE SPARK -->
+<section class="chapter" data-chapter="1" data-color-warm="0.4" data-color-cool="0">
+  <span class="chapter-num">Chapter 01 — The Spark</span>
+  <div class="group">
+    <h3 data-split-words>Every <i>story</i> begins with a spark.</h3>
+    <p class="lead" data-split-words>A single point of light. A breath of warmth. The first frame of an idea that wants to become something larger than itself.</p>
+  </div>
+</section>
+
+<!-- CHAPTER 2: THE FLIGHT -->
+<section class="chapter" data-chapter="2" data-color-warm="0.85" data-color-cool="0">
+  <span class="chapter-num">Chapter 02 — The Flight</span>
+  <div class="group">
+    <h3 data-split-words>It rises. It <i>burns</i>. It moves.</h3>
+    <p class="lead" data-split-words>What begins as ember becomes flight. Motion gives meaning. A trail of feathers becomes a signature in the sky.</p>
+  </div>
+</section>
+
+<!-- CHAPTER 3: THE COLD -->
+<section class="chapter" data-chapter="3" data-color-warm="0" data-color-cool="0.9">
+  <span class="chapter-num">Chapter 03 — The Cold</span>
+  <div class="group">
+    <h3 data-split-words>Then the <i>silence</i> of ice.</h3>
+    <p class="lead" data-split-words>Stillness sharpens form. Crystals catch the light. In the cold pause, the story remembers what it is.</p>
+  </div>
+</section>
+
+<!-- CHAPTER 4: CASES -->
+<section class="chapter" data-chapter="4" data-color-warm="0.3" data-color-cool="0.4">
+  <span class="chapter-num">Chapter 04 — The Work</span>
+  <div class="group" style="width:100%">
+    <h3 data-split-words style="margin-bottom:60px">Stories we have <i>told</i>.</h3>
+    <div class="cases">
+      <div class="case" style="--accent:#ffb38a"><span class="label">2024 · Brand</span><span class="name">Salesforce</span></div>
+      <div class="case" style="--accent:#9cc6ff"><span class="label">2024 · Launch</span><span class="name">AMD</span></div>
+      <div class="case" style="--accent:#eabdf6"><span class="label">2023 · Product</span><span class="name">Coinbase</span></div>
+      <div class="case" style="--accent:#cebdf8"><span class="label">2023 · Identity</span><span class="name">Intel</span></div>
+      <div class="case" style="--accent:#fbd1e2"><span class="label">2022 · Editorial</span><span class="name">Vogue</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 5: RELEASE -->
+<section class="chapter" data-chapter="5" data-color-warm="1.0" data-color-cool="0.3">
+  <span class="chapter-num">Chapter 05 — The Release</span>
+  <div class="group">
+    <h3 data-split-words>Set the <i>spirit</i> free.</h3>
+    <p class="lead" data-split-words>The story finds its audience. The phoenix opens its wings. What you imagined now belongs to the world.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<section class="footer-section" id="footer" data-chapter="6" data-color-warm="0.2" data-color-cool="0.1">
+  <div>
+    <h2 data-split-words>Let us help you tell <i>your</i> story the way it was meant.</h2>
+    <a class="mail" href="mailto:hello@example.com">hello@example.com</a>
+    <div class="links">
+      <a href="#">Instagram</a><a href="#">X</a><a href="#">LinkedIn</a>
+    </div>
+    <div class="colophon">A Noomo-style storytelling demo · built with three.js + gsap</div>
+  </div>
+</section>
+
+</main>
+
+<!-- Libraries: three + gsap + ScrollTrigger via CDN (no build step) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+/* =========================================================
+ *  Storytelling-style demo
+ *  - Three.js phoenix made of GPU points (~12k particles)
+ *  - Scroll drives camera + per-section "warm/cool" mood
+ *  - GSAP ScrollTrigger orchestrates text + state
+ *  - Custom cursor, preloader radial reveal, release-spirit btn
+ * ========================================================= */
+
+(() => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ---------------- Custom cursor ---------------- */
+  const cursor = document.getElementById('cursor');
+  const dot    = document.getElementById('cursorDot');
+  let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
+  addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY;
+    dot.style.transform = `translate(${tx}px, ${ty}px) translate(-50%,-50%)`;
+  });
+  function cursorLoop(){
+    cx += (tx-cx)*.18; cy += (ty-cy)*.18;
+    cursor.style.transform = `translate(${cx}px, ${cy}px) translate(-50%,-50%)`;
+    requestAnimationFrame(cursorLoop);
+  }
+  cursorLoop();
+  document.querySelectorAll('a,button,.case,.spirit,.mail').forEach(el => {
+    el.addEventListener('pointerenter', () => cursor.classList.add('hover'));
+    el.addEventListener('pointerleave', () => cursor.classList.remove('hover'));
+  });
+
+  /* ---------------- Split text helper ---------------- */
+  // Wraps every word in <span class="word"><span class="inner">word</span></span>
+  // Lighter than SplitText but enough for our entrances.
+  function splitWords(el){
+    if (el.dataset.split === '1') return;
+    const html = el.innerHTML;
+    // preserve <i> tags by working node-by-node
+    const out = document.createElement('span');
+    function walk(node, target){
+      node.childNodes.forEach(child => {
+        if (child.nodeType === 3){
+          const parts = child.textContent.split(/(\s+)/);
+          parts.forEach(p => {
+            if (!p) return;
+            if (/^\s+$/.test(p)){ target.appendChild(document.createTextNode(p)); return; }
+            const w = document.createElement('span'); w.className = 'word';
+            const inner = document.createElement('span'); inner.className = 'inner';
+            inner.textContent = p;
+            w.appendChild(inner);
+            target.appendChild(w);
+          });
+        } else {
+          const clone = child.cloneNode(false);
+          target.appendChild(clone);
+          walk(child, clone);
+        }
+      });
+    }
+    walk(el, out);
+    el.innerHTML = '';
+    el.appendChild(out);
+    el.classList.add('split');
+    el.dataset.split = '1';
+  }
+  document.querySelectorAll('[data-split-words]').forEach(splitWords);
+
+  // Hero h1 character split (so we can do the chromatic stagger)
+  const heroTitle = document.getElementById('heroTitle');
+  heroTitle.innerHTML = [...heroTitle.textContent].map(c =>
+    `<span class="char">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+
+  /* ---------------- Three.js stage ---------------- */
+  const canvas = document.getElementById('scene');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight, false);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 6);
+
+  // Phoenix-shaped point cloud.
+  // We sample points on an analytic "wing-spread bird" surface, then animate
+  // them in a fragment-driven swirl in vertex shader.
+  const N = 12000;
+  const positions = new Float32Array(N*3);
+  const seeds     = new Float32Array(N);
+  const colors    = new Float32Array(N*3);
+
+  function birdShape(t){
+    // t in [0,1]; return (x,y,z) on a stylised phoenix silhouette.
+    // Body = oblong; wings = two trig lobes; tail = downward ribbon.
+    const u = t*Math.PI*2;
+    const r = Math.random();
+    const branch = Math.random();
+    let x,y,z;
+    if (branch < 0.55){
+      // wing fan (left + right)
+      const side = Math.random() < .5 ? -1 : 1;
+      const a = Math.random()*Math.PI*0.7 - 0.1;          // wing arc
+      const len = 1.2 + Math.random()*1.6;                 // wing length
+      const flap = Math.sin(a*2.4)*0.35;                  // wing curve
+      x = side * len * Math.cos(a);
+      y = Math.sin(a)*1.0 + flap;
+      z = (Math.random()-.5)*0.3;
+      // feather thinning at tip
+      if (Math.random() > 1 - (len-1.2)/1.6) y += (Math.random()-.5)*.6;
+    } else if (branch < 0.85){
+      // body
+      const a = Math.random()*Math.PI*2;
+      const rr = Math.random()*0.45;
+      x = Math.cos(a)*rr*0.4;
+      y = Math.sin(a)*rr*0.9 - 0.1;
+      z = (Math.random()-.5)*0.4;
+    } else {
+      // tail ribbon
+      const t2 = Math.random();
+      x = (Math.random()-.5)*0.6*(1-t2);
+      y = -0.4 - t2*2.2;
+      z = (Math.random()-.5)*0.3 + Math.sin(t2*6)*.2;
+    }
+    return [x,y,z];
+  }
+
+  for (let i=0;i<N;i++){
+    const [x,y,z] = birdShape(i/N);
+    positions[i*3+0] = x;
+    positions[i*3+1] = y;
+    positions[i*3+2] = z;
+    seeds[i] = Math.random();
+    // base color = warm rose; we'll mix in shader
+    colors[i*3+0] = 1.0;
+    colors[i*3+1] = 0.78 + Math.random()*0.2;
+    colors[i*3+2] = 0.85 + Math.random()*0.15;
+  }
+
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geom.setAttribute('aSeed',    new THREE.BufferAttribute(seeds, 1));
+  geom.setAttribute('aColor',   new THREE.BufferAttribute(colors, 3));
+
+  const uniforms = {
+    uTime:    {value:0},
+    uWarm:    {value:0},   // 0..1 fire intensity
+    uCool:    {value:0},   // 0..1 ice intensity
+    uForm:    {value:0},   // 0..1 how "assembled" the phoenix is
+    uExplode: {value:0},   // 0..1 final dispersal
+    uSize:    {value: Math.min(devicePixelRatio,2) * 1.6},
+    uPointer: {value: new THREE.Vector2(0,0)},
+  };
+
+  const vert = `
+    attribute float aSeed;
+    attribute vec3  aColor;
+    uniform float uTime;
+    uniform float uWarm;
+    uniform float uCool;
+    uniform float uForm;
+    uniform float uExplode;
+    uniform float uSize;
+    uniform vec2  uPointer;
+    varying vec3  vColor;
+    varying float vGlow;
+
+    // simple hash-based noise
+    float hash(float n){ return fract(sin(n)*43758.5453); }
+    vec3 swirl(vec3 p, float t, float k){
+      float a = sin(p.y*1.5 + t*0.6 + k*6.28) * 0.6;
+      mat2 R = mat2(cos(a),-sin(a),sin(a),cos(a));
+      p.xz = R * p.xz;
+      return p;
+    }
+
+    void main(){
+      vec3 base = position;
+      float s = aSeed;
+
+      // dispersed/cloud shape: random sphere of radius ~3
+      vec3 cloud = vec3(
+        (hash(s*13.1)-.5),
+        (hash(s*23.7)-.5),
+        (hash(s*7.9)-.5)
+      ) * 6.0;
+
+      // assemble: lerp from cloud → bird shape based on uForm
+      vec3 pos = mix(cloud, base, smoothstep(0.0, 1.0, uForm));
+
+      // gentle swirl while warm
+      pos = swirl(pos, uTime, s);
+
+      // fire updraft when warm
+      pos.y += uWarm * (sin(uTime*2.0 + s*30.0) * 0.05 + (1.0-aSeed)*0.4*uWarm);
+
+      // ice crystallise: pull onto a faceted lattice when cool
+      vec3 iced = floor(pos*4.0)/4.0 + 0.05*sin(pos*8.0 + uTime*0.5);
+      pos = mix(pos, iced, uCool);
+
+      // pointer push
+      vec3 toCam = normalize(vec3(uPointer, 0.0) - vec3(pos.xy, 0.0));
+      pos.xy += uPointer * 0.3 * (1.0 - smoothstep(0.0, 2.0, length(pos.xy - uPointer*2.0)));
+
+      // explode at end
+      pos += normalize(cloud + 0.001) * uExplode * (1.5 + hash(s)*2.0);
+
+      vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = uSize * (1.0 + uWarm*1.6) * (320.0 / -mv.z);
+
+      // color blend: warm rose → cool blue
+      vec3 warmCol = mix(vec3(1.0, 0.55, 0.35), vec3(1.0, 0.85, 0.6), s);
+      vec3 coolCol = mix(vec3(0.45, 0.7, 1.0), vec3(0.85, 0.9, 1.0), s);
+      vec3 calmCol = aColor;
+      vec3 col = mix(calmCol, warmCol, uWarm);
+      col = mix(col, coolCol, uCool);
+
+      vColor = col;
+      vGlow = uWarm * (0.6 + 0.4*sin(uTime*3.0 + s*6.28));
+    }
+  `;
+
+  const frag = `
+    varying vec3  vColor;
+    varying float vGlow;
+    void main(){
+      vec2 uv = gl_PointCoord - 0.5;
+      float d = length(uv);
+      if (d > 0.5) discard;
+      float alpha = smoothstep(0.5, 0.0, d);
+      // soft additive glow
+      vec3 c = vColor + vGlow * vec3(1.0,0.5,0.3);
+      gl_FragColor = vec4(c, alpha * 0.95);
+    }
+  `;
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms, vertexShader: vert, fragmentShader: frag,
+    transparent:true, depthWrite:false,
+    blending: THREE.AdditiveBlending
+  });
+
+  const phoenix = new THREE.Points(geom, mat);
+  scene.add(phoenix);
+
+  // soft background gradient via clear color drift
+  const bgColor = new THREE.Color('#0d1124');
+  scene.background = null; // transparent canvas, gradient handled by body
+
+  /* ---------------- Resize ---------------- */
+  addEventListener('resize', () => {
+    renderer.setSize(innerWidth, innerHeight, false);
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  /* ---------------- Pointer to scene ---------------- */
+  const ptr = new THREE.Vector2();
+  addEventListener('pointermove', e => {
+    ptr.x = (e.clientX/innerWidth - .5)*2;
+    ptr.y = -(e.clientY/innerHeight - .5)*2;
+  });
+
+  /* ---------------- Scroll-driven state ---------------- */
+  // Each section publishes a "chapter" index + warm/cool intent.
+  // We read scroll progress and tween uniforms.
+  const sections = [...document.querySelectorAll('section')];
+  const state = {warm:0, cool:0, form:0, explode:0, camZ:6, camY:0, camX:0, rotY:0};
+
+  // Per-chapter targets
+  const chapterTargets = sections.map(s => ({
+    warm: parseFloat(s.dataset.colorWarm)||0,
+    cool: parseFloat(s.dataset.colorCool)||0,
+  }));
+
+  // Master progress timeline: chapter index → camera + form
+  // chapter 0 hero  → form .1, far cam
+  // chapter 1 spark → form .55
+  // chapter 2 flight→ form 1.0, slight side
+  // chapter 3 cold  → form 1.0, closer
+  // chapter 4 cases → form .9, pulled back
+  // chapter 5 release→ explode .3
+  // chapter 6 footer→ explode 1.0
+
+  const chapterCamera = [
+    {form:0.05, z:7.5, x:0,    y:0,   ry:0,    explode:0},
+    {form:0.55, z:5.5, x:.4,   y:.1,  ry:.15,  explode:0},
+    {form:1.0,  z:4.5, x:-.3,  y:.2,  ry:-.2,  explode:0},
+    {form:1.0,  z:3.8, x:.0,   y:.0,  ry:.05,  explode:0},
+    {form:0.9,  z:6.2, x:.0,   y:-.2, ry:-.05, explode:0},
+    {form:0.85, z:5.0, x:.0,   y:.3,  ry:.3,   explode:.25},
+    {form:0.3,  z:7.5, x:.0,   y:.6,  ry:.5,   explode:1.0},
+  ];
+
+  // Build a single timeline that reads window scroll
+  ScrollTrigger.create({
+    trigger: document.body,
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate(self){
+      const total = sections.length - 1; // 0..6
+      const p = self.progress * total;   // 0..6 fractional
+      const i = Math.min(Math.floor(p), total-1);
+      const f = p - i;                   // 0..1 within chapter
+      const A = chapterCamera[i], B = chapterCamera[i+1] || chapterCamera[i];
+      const At = chapterTargets[i], Bt = chapterTargets[i+1] || At;
+      const lerp = (a,b,t)=>a+(b-a)*t;
+      const ease = f*f*(3-2*f); // smoothstep
+
+      state.form    = lerp(A.form,    B.form,    ease);
+      state.camZ    = lerp(A.z,       B.z,       ease);
+      state.camX    = lerp(A.x,       B.x,       ease);
+      state.camY    = lerp(A.y,       B.y,       ease);
+      state.rotY    = lerp(A.ry,      B.ry,      ease);
+      state.explode = lerp(A.explode, B.explode, ease);
+      state.warm    = lerp(At.warm,   Bt.warm,   ease);
+      state.cool    = lerp(At.cool,   Bt.cool,   ease);
+    }
+  });
+
+  /* ---------------- Section text entrances ---------------- */
+  document.querySelectorAll('[data-split-words]').forEach(el => {
+    const words = el.querySelectorAll('.word .inner');
+    gsap.set(words, {yPercent:120, opacity:0});
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 80%',
+      onEnter: () => gsap.to(words, {
+        yPercent:0, opacity:1, duration:.9, ease:'power3.out',
+        stagger:.025
+      }),
+      onLeaveBack: () => gsap.to(words, {
+        yPercent:120, opacity:0, duration:.4, ease:'power2.in',
+        stagger:.01
+      }),
+    });
+  });
+
+  // Hero h1 chars — drift in with chromatic feel
+  const chars = heroTitle.querySelectorAll('.char');
+  gsap.set(chars, {yPercent:140, opacity:0, rotate:8});
+  // animate AFTER preloader resolves (see below)
+
+  // Cases stagger
+  const cases = document.querySelectorAll('.case');
+  gsap.set(cases, {y:60, opacity:0});
+  ScrollTrigger.create({
+    trigger: '.cases',
+    start: 'top 75%',
+    onEnter: () => gsap.to(cases, {y:0, opacity:1, duration:.9, ease:'power3.out', stagger:.08}),
+    onLeaveBack: () => gsap.to(cases, {y:60, opacity:0, duration:.3}),
+  });
+
+  /* ---------------- Release-spirit button ---------------- */
+  const spiritBtn = document.getElementById('spirit');
+  spiritBtn.addEventListener('click', () => {
+    // burst the phoenix briefly, then re-form
+    gsap.to(uniforms.uExplode, {value:.6, duration:.6, ease:'power2.out'})
+      .then(() => gsap.to(uniforms.uExplode, {value:0, duration:1.4, ease:'power2.inOut'}));
+    gsap.to(uniforms.uWarm, {value:1.0, duration:.5, yoyo:true, repeat:1, ease:'sine.inOut'});
+    // letter wave
+    const lts = spiritBtn.querySelectorAll('.letters span');
+    gsap.fromTo(lts, {y:0}, {y:-6, duration:.25, stagger:.03, ease:'power2.out',
+      onComplete:() => gsap.to(lts, {y:0, duration:.3, stagger:.03, ease:'power2.in'})});
+  });
+
+  /* ---------------- Preloader → reveal ---------------- */
+  function startReveal(){
+    const pl = document.getElementById('preloader');
+    pl.classList.add('revealing');
+    // animate the radial mask radius
+    gsap.fromTo(pl, {'--reveal':'0vmax'}, {
+      '--reveal':'140vmax', duration:1.6, ease:'power3.inOut',
+      onComplete:() => { pl.style.display='none'; }
+    });
+    // hero title in
+    gsap.to(chars, {
+      yPercent:0, opacity:1, rotate:0,
+      duration:1.1, ease:'power3.out', stagger:.025, delay:.2
+    });
+    // h2 words
+    const h2words = document.querySelectorAll('.hero h2 .word .inner');
+    gsap.to(h2words, {yPercent:0, opacity:1, duration:.8, ease:'power3.out', stagger:.03, delay:.5});
+  }
+
+  /* ---------------- Main render loop ---------------- */
+  let hintHidden = false;
+  const clock = new THREE.Clock();
+  function tick(){
+    const t = clock.getElapsedTime();
+    uniforms.uTime.value = t;
+
+    // ease state into uniforms
+    uniforms.uWarm.value    += (state.warm    - uniforms.uWarm.value)   * .08;
+    uniforms.uCool.value    += (state.cool    - uniforms.uCool.value)   * .08;
+    uniforms.uForm.value    += (state.form    - uniforms.uForm.value)   * .08;
+    uniforms.uExplode.value += (state.explode - uniforms.uExplode.value)* .06;
+    uniforms.uPointer.value.x += (ptr.x - uniforms.uPointer.value.x) * .05;
+    uniforms.uPointer.value.y += (ptr.y - uniforms.uPointer.value.y) * .05;
+
+    camera.position.x += (state.camX - camera.position.x)*.05;
+    camera.position.y += (state.camY - camera.position.y)*.05;
+    camera.position.z += (state.camZ - camera.position.z)*.05;
+    phoenix.rotation.y += (state.rotY - phoenix.rotation.y)*.05;
+    phoenix.rotation.z = Math.sin(t*0.3)*.04;
+
+    camera.lookAt(0,0,0);
+
+    // body bg drift to match mood
+    const warm = uniforms.uWarm.value, cool = uniforms.uCool.value;
+    const r = Math.round( 13 + warm*30 - cool*5 );
+    const g = Math.round( 17 + warm*8  + cool*10 );
+    const b = Math.round( 36 - warm*8  + cool*40 );
+    document.body.style.background = `rgb(${r},${g},${b})`;
+
+    renderer.render(scene, camera);
+
+    // hide scroll hint after first scroll
+    if (!hintHidden && scrollY > 50){
+      hintHidden = true;
+      gsap.to('#scrollHint', {opacity:0, duration:.4});
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // kick off after a short delay so layout settles
+  requestAnimationFrame(() => {
+    tick();
+    // start preload reveal once the first frame is up
+    setTimeout(startReveal, 600);
+  });
+
+})();
+</script>
+
+</body>
+</html>
