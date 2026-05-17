@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPIN A TALE — 紡ぐ物語 | 仿 ivress 风格动画</title>
+  <meta name="description" content="一个仿 brand.ivress.co.jp 的滚动叙事动画页面" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="is-loading">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-content">
+      <button class="sound-toggle" id="soundToggle" aria-pressed="false">
+        <span class="sound-label">SOUND</span>
+        <span class="sound-icon">
+          <span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span>
+        </span>
+      </button>
+      <a href="#" class="lang-switch">EN</a>
+    </div>
+  </header>
+
+  <!-- Loader -->
+  <div id="loader" class="loader-wrap" aria-label="Loading">
+    <div class="loader-ring"></div>
+    <div class="loader-num"><span id="loaderValue">00</span><span class="percent">%</span></div>
+  </div>
+
+  <main id="main" class="main">
+
+    <!-- Prologue letters -->
+    <div class="prologue fixed-full" id="prologue">
+      <p class="prologue-text">
+        <span class="letter" data-delay="4">这</span><span class="letter" data-delay="0">是</span><span class="letter" data-delay="6">一</span><span class="letter" data-delay="8">个</span><span class="letter" data-delay="2">拒</span><span class="letter" data-delay="4">绝</span><span class="letter" data-delay="1">光</span><span class="letter" data-delay="6">明</span><span class="letter" data-delay="5">的</span><span class="letter" data-delay="0">世界</span>
+      </p>
+    </div>
+
+    <!-- Title -->
+    <section class="title-screen fixed-full" id="titleScreen">
+      <h1 class="main-title">
+        <span class="mt-row">
+          <span class="split-text mt-above">
+            <span class="split-char" style="--i:0">A</span>
+            <span class="split-char split-space" style="--i:1">&nbsp;</span>
+            <span class="split-char" style="--i:2">B</span>
+            <span class="split-char" style="--i:3">R</span>
+            <span class="split-char" style="--i:4">A</span>
+            <span class="split-char" style="--i:5">N</span>
+            <span class="split-char" style="--i:6">D</span>
+            <span class="split-char split-space" style="--i:7">&nbsp;</span>
+            <span class="split-char" style="--i:8">S</span>
+            <span class="split-char" style="--i:9">T</span>
+            <span class="split-char" style="--i:10">O</span>
+            <span class="split-char" style="--i:11">R</span>
+            <span class="split-char" style="--i:12">Y</span>
+          </span>
+        </span>
+        <span class="mt-row">
+          <span class="split-text mt-below">
+            <span class="split-char" style="--i:0">S</span>
+            <span class="split-char" style="--i:1">P</span>
+            <span class="split-char" style="--i:2">I</span>
+            <span class="split-char" style="--i:3">N</span>
+            <span class="split-char split-space" style="--i:4">&nbsp;</span>
+            <span class="split-char" style="--i:5">A</span>
+            <span class="split-char split-space" style="--i:6">&nbsp;</span>
+            <span class="split-char" style="--i:7">T</span>
+            <span class="split-char" style="--i:8">A</span>
+            <span class="split-char" style="--i:9">L</span>
+            <span class="split-char" style="--i:10">E</span>
+          </span>
+        </span>
+      </h1>
+      <p class="main-subtitle">
+        <span class="subtitle-char" style="--i:0">紡</span>
+        <span class="subtitle-char" style="--i:1">ぐ</span>
+        <span class="subtitle-char" style="--i:2">物</span>
+        <span class="subtitle-char" style="--i:3">語</span>
+      </p>
+
+      <button class="start-button" id="startButton" aria-label="Start the story">
+        <span class="ripple"></span>
+        <span class="ripple-cover"></span>
+        <span class="sb-text">
+          <span class="sb-line">CLICK TO</span>
+          <span class="sb-line strong">START</span>
+        </span>
+      </button>
+    </section>
+
+    <!-- Scroll-driven story -->
+    <div class="story" id="story">
+
+      <section class="story-section" data-section="1">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="2">旅</span><span class="letter" data-delay="3">人</span><span class="letter" data-delay="7">，</span><br/>
+            <span class="letter" data-delay="2">在</span><span class="letter" data-delay="5">世</span><span class="letter" data-delay="7">界</span><span class="letter" data-delay="2">的</span><span class="letter" data-delay="8">边</span><span class="letter" data-delay="8">缘</span><span class="letter" data-delay="0">徘</span><span class="letter" data-delay="9">徊</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="story-section" data-section="2">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="7">他</span><span class="letter" data-delay="6">遇</span><span class="letter" data-delay="4">见</span><span class="letter" data-delay="1">了</span><span class="letter" data-delay="2">无</span><span class="letter" data-delay="2">名</span><span class="letter" data-delay="1">之</span><span class="letter" data-delay="3">人</span><br/>
+            <span class="letter" data-delay="8">背</span><span class="letter" data-delay="8">影</span><span class="letter" data-delay="1">里</span><span class="letter" data-delay="2">藏</span><span class="letter" data-delay="9">着</span><span class="letter" data-delay="8">摇</span><span class="letter" data-delay="9">曳</span><span class="letter" data-delay="6">的</span><span class="letter" data-delay="5">阴</span><span class="letter" data-delay="2">影</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="story-section" data-section="3">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="0">旅</span><span class="letter" data-delay="8">人</span><span class="letter" data-delay="3">释</span><span class="letter" data-delay="4">放</span><span class="letter" data-delay="8">了</span><span class="letter" data-delay="0">光</span><span class="letter" data-delay="3">，</span><span class="letter" data-delay="3">驱</span><span class="letter" data-delay="9">散</span><span class="letter" data-delay="5">阴</span><span class="letter" data-delay="6">霾</span><br/>
+            <span class="letter" data-delay="6">为</span><span class="letter" data-delay="3">他</span><span class="letter" data-delay="8">点</span><span class="letter" data-delay="4">燃</span><span class="letter" data-delay="0">勇</span><span class="letter" data-delay="1">气</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="story-section" data-section="4">
+        <div class="ss-inner">
+          <p class="story-text">
+            <span class="letter" data-delay="3">「</span><span class="letter" data-delay="0">我</span><span class="letter" data-delay="0">也</span><span class="letter" data-delay="8">想</span><span class="letter" data-delay="7">成</span><span class="letter" data-delay="4">为</span><span class="letter" data-delay="9">某</span><span class="letter" data-delay="5">个</span><span class="letter" data-delay="2">人</span><span class="letter" data-delay="4">」</span><br/>
+            <span class="letter" data-delay="7">微</span><span class="letter" data-delay="0">小</span><span class="letter" data-delay="8">的</span><span class="letter" data-delay="0">芽</span><span class="letter" data-delay="8">，</span><span class="letter" data-delay="6">在</span><span class="letter" data-delay="1">心</span><span class="letter" data-delay="7">底</span><span class="letter" data-delay="2">绽</span><span class="letter" data-delay="8">放</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- Final climax: gradient letters -->
+      <section class="story-section final-section" data-section="5">
+        <div class="ss-inner">
+          <p class="story-text final-text">
+            <span class="letter" data-delay="2" style="color:#feedb5">—</span><span class="letter" data-delay="4" style="color:#feeaaa">逆</span><span class="letter" data-delay="0" style="color:#fee79f">境</span><span class="letter" data-delay="4" style="color:#fee594">是</span><span class="letter" data-delay="3" style="color:#fee289">进</span><span class="letter" data-delay="9" style="color:#fedf7e">化</span><span class="letter" data-delay="9" style="color:#ffdc74">的</span><span class="letter" data-delay="0" style="color:#ffd969">养</span><span class="letter" data-delay="3" style="color:#ffd65e">分</span><span class="letter" data-delay="5" style="color:#ffd453">—</span><br/>
+            <span class="letter" data-delay="7" style="color:#feedb5">受</span><span class="letter" data-delay="0" style="color:#feebae">伤</span><span class="letter" data-delay="3" style="color:#fee9a6">、</span><span class="letter" data-delay="2" style="color:#fee79f">跌</span><span class="letter" data-delay="1" style="color:#fee597">倒</span><span class="letter" data-delay="0" style="color:#fee390">、</span><span class="letter" data-delay="1" style="color:#fee188">迷</span><span class="letter" data-delay="9" style="color:#fedf81">惘</span><span class="letter" data-delay="1" style="color:#ffde79">；</span><br/>
+            <span class="letter" data-delay="9" style="color:#ffdc72">每</span><span class="letter" data-delay="9" style="color:#ffda6a">一</span><span class="letter" data-delay="0" style="color:#ffd863">次</span><span class="letter" data-delay="3" style="color:#ffd65b">，</span><span class="letter" data-delay="0" style="color:#ffd454">都</span><span class="letter" data-delay="3" style="color:#ffd24c">让</span><span class="letter" data-delay="0" style="color:#ffd045">我</span><span class="letter" data-delay="4" style="color:#ffce3d">们</span><span class="letter" data-delay="2" style="color:#ffcb35">更</span><span class="letter" data-delay="6" style="color:#ffc92e">强</span>
+          </p>
+          <p class="final-credit">— SPIN A TALE —</p>
+          <button class="restart" id="restart">RESTART</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="scroll-hint" id="scrollHint" aria-hidden="true">
+      <span>SCROLL</span>
+      <span class="arrow"></span>
+      <span class="arrow"></span>
+      <span class="arrow"></span>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
