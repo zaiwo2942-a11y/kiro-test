@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#080506" />
+<meta name="color-scheme" content="dark" />
+<title>互动网页端空模板｜Desktop Story Template</title>
+<style>
+:root{
+  --bg:#080506;
+  --wine:#4b0f1c;
+  --deep:#7d1d2d;
+  --rose:#c17886;
+  --orange:#c86623;
+  --gold:#d7ad58;
+  --white:#eee6dc;
+  --muted:#b8aaa0;
+  --panel:rgba(8,5,6,.72);
+  --line:rgba(238,230,220,.18);
+  --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+  --hand:"Ma Shan Zheng","KaiTi","STKaiti",cursive;
+  --latin:"Cormorant Garamond","Times New Roman",serif;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--white);
+  font-family:var(--serif);
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:50;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(199,120,134,.16),transparent 28%),
+    radial-gradient(circle at 88% 75%,rgba(215,173,88,.10),transparent 27%),
+    linear-gradient(90deg,rgba(255,255,255,.032) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.024) 1px,transparent 1px);
+  background-size:auto,auto,68px 68px,68px 68px;
+  mix-blend-mode:screen;
+  opacity:.74;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:51;
+  pointer-events:none;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="160" height="160" filter="url(%23n)" opacity="0.18"/></svg>');
+  opacity:.13;
+  mix-blend-mode:overlay;
+}
+.app{position:relative;width:100vw;height:100vh;overflow:hidden}
+.progress{
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:70;
+  width:0;
+  height:3px;
+  background:linear-gradient(90deg,var(--deep),var(--gold));
+  transition:width .45s ease;
+}
+.topbar{
+  position:fixed;
+  top:22px;
+  left:32px;
+  right:32px;
+  z-index:45;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:none;
+}
+.brand{
+  font-family:var(--latin);
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(238,230,220,.7);
+}
+.brand b{
+  font-family:var(--serif);
+  font-size:15px;
+  letter-spacing:.14em;
+  color:var(--white);
+  font-weight:500;
+}
+.tools{display:flex;gap:10px;pointer-events:auto}
+button,.btn{
+  font-family:var(--serif);
+  color:var(--white);
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(238,230,220,.18);
+  border-radius:999px;
+  padding:9px 15px;
+  cursor:pointer;
+  transition:.25s ease;
+  backdrop-filter:blur(16px);
+}
+button:hover,.btn:hover{
+  background:rgba(199,120,134,.18);
+  border-color:rgba(215,173,88,.45);
+  transform:translateY(-1px);
+}
+button:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.nav{
+  position:fixed;
+  left:30px;
+  top:50%;
+  z-index:35;
+  transform:translateY(-50%);
+  width:205px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.nav button{
+  border-radius:12px;
+  padding:8px 10px;
+  text-align:left;
+  background:rgba(8,5,6,.38);
+  font-size:12px;
+  color:rgba(238,230,220,.58);
+  display:grid;
+  grid-template-columns:34px 1fr;
+  gap:8px;
+  align-items:center;
+}
+.nav button span:first-child{
+  font-family:var(--latin);
+  color:rgba(215,173,88,.62);
+  font-size:11px;
+}
+.nav button.active{
+  background:rgba(75,15,28,.72);
+  color:#fff;
+  border-color:rgba(215,173,88,.55);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+}
+.scene{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  pointer-events:none;
+  transform:scale(1.018);
+  transition:opacity .7s ease,transform .85s ease;
+}
+.scene.active{
+  opacity:1;
+  pointer-events:auto;
+  transform:scale(1);
+}
+.scene-bg{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 52% 42%,rgba(125,29,45,.30),transparent 45%),
+    linear-gradient(135deg,#0f0608,#050304 50%,#170a07);
+}
+.scene-bg::before{
+  content:attr(data-slot);
+  position:absolute;
+  inset:8vh 10vw;
+  border:1px dashed rgba(238,230,220,.14);
+  border-radius:38px;
+  display:grid;
+  place-items:center;
+  color:rgba(238,230,220,.20);
+  font-family:var(--latin);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  font-size:16px;
+}
+.scene-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(8,5,6,.92) 0%,rgba(8,5,6,.72) 22%,rgba(8,5,6,.22) 58%,rgba(8,5,6,.82) 100%),
+    linear-gradient(0deg,rgba(8,5,6,.86),transparent 36%,rgba(8,5,6,.42));
+}
+body.second .scene-bg{filter:brightness(.82) saturate(.7)}
+.layout{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:grid;
+  grid-template-columns:290px minmax(430px,46vw) minmax(560px,1fr);
+  gap:34px;
+  align-items:center;
+  padding:92px 56px 80px 260px;
+}
+.copy{grid-column:2;max-width:680px;align-self:center}
+.copy .chapter{
+  font-family:var(--latin);
+  font-size:12px;
+  letter-spacing:.34em;
+  color:rgba(215,173,88,.82);
+  text-transform:uppercase;
+  margin-bottom:18px;
+}
+.copy h1,.copy h2{
+  margin:0 0 22px;
+  font-weight:500;
+  line-height:1.08;
+  letter-spacing:.03em;
+  text-shadow:0 12px 60px rgba(0,0,0,.7);
+}
+.copy h1{font-size:68px}
+.copy h2{font-size:48px}
+.copy p{
+  margin:0 0 14px;
+  font-size:20px;
+  line-height:1.85;
+  color:rgba(238,230,220,.86);
+  letter-spacing:.04em;
+}
+.copy .quote{
+  font-family:var(--hand);
+  font-size:36px;
+  line-height:1.55;
+  color:#fff;
+  margin:18px 0 20px;
+  text-shadow:0 0 30px rgba(199,120,134,.35);
+}
+.copy .micro{
+  font-size:13px;
+  color:rgba(238,230,220,.58);
+  letter-spacing:.08em;
+}
+.interaction{
+  grid-column:3;
+  min-height:620px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.panel{
+  width:min(680px,100%);
+  min-height:520px;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(8,5,6,.62),rgba(8,5,6,.36));
+  box-shadow:0 22px 80px rgba(0,0,0,.44);
+  backdrop-filter:blur(18px);
+  position:relative;
+  overflow:visible;
+}
+.panel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(199,120,134,.2),transparent 34%),
+    radial-gradient(circle at 88% 88%,rgba(215,173,88,.12),transparent 34%);
+}
+.panel>*{position:relative;z-index:1}
+.image-slot{
+  width:100%;
+  height:470px;
+  border-radius:22px;
+  border:1px solid rgba(238,230,220,.14);
+  background:
+    radial-gradient(circle at 50% 45%,rgba(238,230,220,.10),transparent 34%),
+    #050304;
+  display:grid;
+  place-items:center;
+  color:rgba(238,230,220,.22);
+  font-family:var(--latin);
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+.hint{
+  margin-top:18px;
+  color:rgba(238,230,220,.62);
+  font-size:13px;
+  letter-spacing:.05em;
+}
+.result{
+  min-height:62px;
+  margin-top:18px;
+  padding:16px 18px;
+  border-radius:18px;
+  border:1px solid rgba(215,173,88,.28);
+  background:rgba(8,5,6,.45);
+  line-height:1.8;
+  color:#fff;
+  white-space:pre-line;
+}
+.second-note{
+  display:none;
+  margin-top:16px;
+  padding:14px 16px;
+  border-left:2px solid var(--deep);
+  color:#f1c0c8;
+  background:rgba(125,29,45,.14);
+  font-size:15px;
+  line-height:1.7;
+}
+body.second .second-note{display:block}
+.artifact-box{
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  z-index:40;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border:1px solid rgba(238,230,220,.16);
+  border-radius:999px;
+  background:rgba(8,5,6,.65);
+  backdrop-filter:blur(16px);
+  box-shadow:0 18px 80px rgba(0,0,0,.45);
+}
+.artifact-box .label{
+  font-size:12px;
+  color:rgba(238,230,220,.6);
+  letter-spacing:.16em;
+  margin-right:3px;
+}
+.artifact{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(238,230,220,.12);
+  background:rgba(255,255,255,.04);
+  font-size:14px;
+  filter:grayscale(1);
+  opacity:.42;
+  transition:.35s ease;
+}
+.artifact.got{
+  filter:none;
+  opacity:1;
+  background:rgba(215,173,88,.16);
+  border-color:rgba(215,173,88,.52);
+  box-shadow:0 0 22px rgba(215,173,88,.24);
+}
+.controls{
+  position:fixed;
+  right:34px;
+  bottom:28px;
+  z-index:42;
+  display:flex;
+  gap:10px;
+}
+.opening{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:#050304;
+  display:grid;
+  place-items:center;
+  transition:opacity .6s ease,visibility .6s ease;
+}
+.opening.done{opacity:0;visibility:hidden;pointer-events:none}
+.memory-table{
+  width:min(980px,86vw);
+  height:620px;
+  border-radius:38px;
+  border:1px solid rgba(238,230,220,.16);
+  background:
+    radial-gradient(circle at 50% 22%,rgba(75,15,28,.45),transparent 46%),
+    linear-gradient(145deg,#13090c,#070506 62%,#1a0c08);
+  box-shadow:0 34px 120px rgba(0,0,0,.8);
+  position:relative;
+  overflow:hidden;
+  padding:56px;
+}
+.memory-table h1{
+  font-size:58px;
+  line-height:1.1;
+  margin:0;
+  font-weight:500;
+  max-width:640px;
+}
+.memory-table p{
+  max-width:560px;
+  color:rgba(238,230,220,.68);
+  line-height:1.8;
+  font-size:16px;
+}
+.table-obj{
+  position:absolute;
+  border:1px solid rgba(238,230,220,.18);
+  background:rgba(255,255,255,.04);
+  border-radius:24px;
+  padding:22px;
+  cursor:pointer;
+  text-align:center;
+  transition:.35s ease;
+  min-width:140px;
+  box-shadow:0 16px 50px rgba(0,0,0,.32);
+}
+.table-obj:hover,.table-obj.opened{
+  transform:translateY(-5px) rotate(-1deg);
+  border-color:rgba(215,173,88,.55);
+  background:rgba(215,173,88,.1);
+}
+.table-obj .icon{font-size:38px;display:block;margin-bottom:8px}
+.table-obj .txt{font-size:13px;color:rgba(238,230,220,.78)}
+#obj-1{right:130px;top:100px}
+#obj-2{right:260px;bottom:110px}
+#obj-3{left:150px;bottom:100px}
+.enter-area{
+  position:absolute;
+  left:56px;
+  bottom:54px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+#enterBtn{font-size:15px;padding:13px 20px;border-color:rgba(215,173,88,.42)}
+.open-status{font-size:13px;color:rgba(238,230,220,.58)}
+.hotspots{
+  position:relative;
+  width:100%;
+  height:470px;
+  border-radius:22px;
+  overflow:hidden;
+  border:1px solid rgba(238,230,220,.12);
+  background:#050304;
+}
+.spot{
+  position:absolute;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid rgba(215,173,88,.95);
+  background:rgba(215,173,88,.12);
+  box-shadow:0 0 0 8px rgba(215,173,88,.07),0 0 24px rgba(215,173,88,.28);
+  cursor:pointer;
+}
+.spot::after{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border-radius:50%;
+  background:var(--gold);
+}
+.tip{
+  position:absolute;
+  left:24px;
+  right:24px;
+  bottom:24px;
+  padding:16px 18px;
+  border-radius:18px;
+  background:rgba(8,5,6,.74);
+  border:1px solid rgba(238,230,220,.14);
+  color:#fff;
+  line-height:1.7;
+  opacity:0;
+  transform:translateY(10px);
+  transition:.25s ease;
+  white-space:pre-line;
+}
+.tip.show{opacity:1;transform:translateY(0)}
+.cards-area{
+  height:420px;
+  border-radius:24px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(90deg,#020202,#12060b 52%,#050304);
+  border:1px solid rgba(238,230,220,.12);
+  cursor:crosshair;
+}
+.cards-area::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(238,230,220,.38),rgba(238,230,220,.12) 10%,transparent 21%);
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+.light-hint{
+  position:absolute;
+  left:24px;
+  bottom:18px;
+  color:rgba(238,230,220,.44);
+  font-size:13px;
+  letter-spacing:.1em;
+  z-index:3;
+  pointer-events:none;
+}
+.note-card{
+  position:absolute;
+  width:174px;
+  height:238px;
+  border-radius:16px;
+  padding:16px 15px;
+  background:#f3eadb;
+  color:#29151a;
+  border:2px solid #8a1f2d;
+  box-shadow:0 22px 50px rgba(0,0,0,.45);
+  font-family:var(--hand);
+  font-size:19px;
+  line-height:1.42;
+  cursor:pointer;
+  transform:rotate(var(--r)) scale(.94);
+  opacity:.03;
+  filter:blur(5px);
+  transition:.28s ease;
+  z-index:2;
+  overflow:hidden;
+}
+.note-card b{
+  display:block;
+  font-family:var(--latin);
+  font-size:30px;
+  color:#941f2f;
+  margin-bottom:6px;
+}
+.note-card small{
+  display:block;
+  font-family:var(--serif);
+  font-size:11px;
+  letter-spacing:.18em;
+  color:#8a1f2d;
+  margin-bottom:10px;
+}
+.note-card p{margin:0;color:#201216}
+.note-card.near{opacity:.72;filter:blur(1px);transform:rotate(var(--r)) scale(1)}
+.note-card:hover,.note-card.found{opacity:1;filter:none;transform:rotate(0deg) scale(1.04);z-index:5}
+.note-card.found{background:#fff3e5}
+.ring-canvas,.draw-canvas{
+  width:100%;
+  height:230px;
+  background:rgba(255,255,255,.035);
+  border-radius:22px;
+  border:1px dashed rgba(238,230,220,.24);
+  display:block;
+  cursor:crosshair;
+}
+.magic-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-top:12px;
+}
+.magic-card{
+  height:132px;
+  border-radius:14px;
+  border:1px solid rgba(238,230,220,.18);
+  background:linear-gradient(135deg,#241017,#080506);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transform-style:preserve-3d;
+  transition:.5s ease;
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
+}
+.magic-card.flipped{
+  background:#f1e9dc;
+  color:#8a1f2d;
+  font-size:42px;
+  font-family:var(--latin);
+  transform:rotateY(180deg);
+}
+.magic-card.flipped span{transform:rotateY(180deg)}
+.flame{
+  width:18px;
+  height:80px;
+  margin:22px auto 8px;
+  border-radius:50% 50% 45% 45%;
+  background:linear-gradient(#fff2aa,#e08a25,#7d1d2d);
+  filter:drop-shadow(0 0 22px #e08a25);
+  opacity:.38;
+  transition:.3s ease;
+}
+.flame.burning{animation:burn 3.8s linear forwards}
+@keyframes burn{0%{height:80px;opacity:1}70%{height:32px}100%{height:0;opacity:0}}
+.burnbar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.burnbar i{display:block;width:0;height:100%;background:linear-gradient(90deg,#e08a25,#fff2aa)}
+.burnbar.go i{animation:bar 3.8s linear forwards}
+@keyframes bar{to{width:100%}}
+.tear-box{
+  height:470px;
+  border-radius:24px;
+  position:relative;
+  overflow:hidden;
+  background:#13090c;
+  border:1px solid rgba(238,230,220,.12);
+}
+.tear-bg{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:rgba(238,230,220,.22);
+  letter-spacing:.24em;
+  font-family:var(--latin);
+  background:radial-gradient(circle at 50% 48%,rgba(238,230,220,.08),transparent 35%),#050304;
+}
+.dossier{
+  position:absolute;
+  inset:30px;
+  background:rgba(238,230,220,.88);
+  color:#1e1113;
+  padding:34px;
+  border-radius:18px;
+  clip-path:polygon(0 0,var(--tear,48%) 0,var(--tear,48%) 100%,0 100%);
+  transition:clip-path .08s linear;
+  box-shadow:0 20px 80px rgba(0,0,0,.45);
+}
+.dossier h3{font-family:var(--latin);font-size:28px;letter-spacing:.12em}
+.dossier p{font-size:18px;color:#2d171d}
+.dragbar{
+  position:absolute;
+  top:30px;
+  bottom:30px;
+  left:calc(var(--tear,48%) - 13px);
+  width:26px;
+  border-radius:999px;
+  background:rgba(215,173,88,.35);
+  border:1px solid rgba(215,173,88,.8);
+  cursor:ew-resize;
+  box-shadow:0 0 22px rgba(215,173,88,.35);
+}
+.hold-zone{
+  height:430px;
+  border-radius:24px;
+  border:1px solid rgba(238,230,220,.12);
+  display:grid;
+  place-items:center;
+  background:radial-gradient(circle at 50% 50%,rgba(125,29,45,.4),transparent 55%),rgba(8,5,6,.45);
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+}
+.hold-zone .bloodline{
+  position:absolute;
+  left:0;
+  bottom:0;
+  z-index:3;
+  height:5px;
+  width:0;
+  background:linear-gradient(90deg,var(--deep),#d94e62);
+  transition:width .05s linear;
+}
+.hold-zone.shake{animation:shake .12s infinite}
+@keyframes shake{50%{transform:translateX(2px)}}
+.hold-big{
+  font-family:var(--hand);
+  font-size:42px;
+  text-align:center;
+  line-height:1.45;
+}
+.hold-small{
+  font-size:14px;
+  color:rgba(238,230,220,.62);
+  margin-top:14px;
+  text-align:center;
+}
+.jar{
+  height:420px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(circle at 50% 55%,rgba(238,230,220,.13),transparent 50%),rgba(8,5,6,.32);
+  border:1px solid rgba(238,230,220,.12);
+  cursor:pointer;
+  overflow:hidden;
+  position:relative;
+}
+.jar::before{
+  content:"◎";
+  font-size:84px;
+  filter:drop-shadow(0 0 26px rgba(215,173,88,.3));
+}
+.jar.alt::before{content:"◇"}
+.ghost{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:rgba(238,230,220,.10);
+  font-size:88px;
+  transition:.45s ease;
+  opacity:0;
+  mix-blend-mode:screen;
+}
+.jar:hover .ghost{opacity:.28}
+.meteor-field{
+  height:470px;
+  border-radius:24px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(#080914,#11070c);
+  border:1px solid rgba(238,230,220,.12);
+  display:grid;
+  place-items:center;
+}
+.umbrella{
+  font-size:96px;
+  cursor:pointer;
+  filter:drop-shadow(0 0 28px rgba(215,173,88,.12));
+  transition:.3s ease;
+  background:rgba(8,5,6,.5);
+  border:1px solid rgba(215,173,88,.28);
+  border-radius:50%;
+  width:150px;
+  height:150px;
+  display:grid;
+  place-items:center;
+  backdrop-filter:blur(8px);
+}
+.umbrella:hover{transform:rotate(-4deg) scale(1.05)}
+.umbrella.gone{opacity:0!important;transform:scale(.72) rotate(10deg)!important;pointer-events:none}
+.star{
+  position:absolute;
+  top:-20px;
+  width:8px;
+  height:24px;
+  background:linear-gradient(#fff,#d7ad58);
+  border-radius:999px;
+  opacity:.95;
+  animation:fall var(--t) linear forwards;
+}
+@keyframes fall{to{transform:translateY(470px) translateX(120px) rotate(35deg);opacity:0}}
+.mirror-stage{
+  height:500px;
+  border-radius:24px;
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(238,230,220,.12);
+  background:#070506;
+  display:grid;
+  place-items:center;
+  color:rgba(238,230,220,.22);
+  font-family:var(--latin);
+  letter-spacing:.24em;
+}
+.fog{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 50% 48%,rgba(238,230,220,.42),rgba(238,230,220,.18) 25%,rgba(8,5,6,.4) 70%);
+  backdrop-filter:blur(6px);
+  transition:opacity .2s ease;
+  cursor:grab;
+}
+.relics{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.relics button{font-size:13px;padding:8px 11px;border-radius:12px}
+.door{
+  height:470px;
+  border-radius:24px;
+  position:relative;
+  overflow:hidden;
+  background:#080506;
+  border:1px solid rgba(238,230,220,.12);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+}
+.door::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 50% 38%,transparent 20%,rgba(8,5,6,.42) 56%,rgba(8,5,6,.82));
+}
+.door .door-inner{position:relative;z-index:2;text-align:center}
+.door .door-progress{
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:6px;
+  width:0;
+  background:linear-gradient(90deg,var(--orange),var(--gold));
+  z-index:3;
+}
+.family-choices{
+  display:none;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+  justify-content:center;
+}
+.family-choices.show{display:flex}
+.family-choices button{border-color:rgba(215,173,88,.45);background:rgba(215,173,88,.1)}
+.page-hidden{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:14px;
+}
+.page-hidden button{
+  font-size:12px;
+  padding:8px 12px;
+  border-radius:12px;
+  white-space:nowrap;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(238,230,220,.18);
+}
+.story-panel{
+  min-height:560px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.story-panel .image-slot{
+  height:320px;
+  margin-bottom:16px;
+}
+.story-meta{
+  font-family:var(--latin);
+  color:rgba(215,173,88,.72);
+  letter-spacing:.16em;
+  font-size:12px;
+  margin:2px 2px 14px;
+  text-transform:uppercase;
+}
+.story-lines{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.story-lines p{
+  margin:0;
+  font-size:16px;
+  line-height:1.95;
+  color:rgba(238,230,220,.84);
+}
+.final-card{
+  max-width:860px;
+  margin:auto;
+  text-align:center;
+  padding:50px;
+  border:1px solid rgba(238,230,220,.15);
+  background:rgba(8,5,6,.72);
+  border-radius:34px;
+  backdrop-filter:blur(18px);
+  box-shadow:0 28px 90px rgba(0,0,0,.45);
+}
+.final-card h2{font-size:48px;font-weight:500}
+.final-card p{font-size:20px;line-height:1.9;color:rgba(238,230,220,.78)}
+.toast{
+  position:fixed;
+  right:32px;
+  top:86px;
+  z-index:90;
+  min-width:260px;
+  max-width:400px;
+  padding:16px 18px;
+  border-radius:18px;
+  background:rgba(8,5,6,.82);
+  border:1px solid rgba(215,173,88,.35);
+  box-shadow:0 20px 70px rgba(0,0,0,.45);
+  opacity:0;
+  transform:translateY(-10px);
+  transition:.3s ease;
+  white-space:pre-line;
+  line-height:1.7;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.desktop-note{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:999;
+  background:#080506;
+  color:white;
+  padding:46px;
+  line-height:1.8;
+}
+.desktop-note h1{font-size:32px}
+@media(max-width:1000px){
+  .desktop-note{display:block}
+  .app,.topbar,.nav,.artifact-box,.controls,.opening{display:none!important}
+}
+
+/* =========================================================
+   FRONTEND OPTIMIZATION PACK
+   目标：把“桌面端空模板”升级为更适合路演展示和真实用户体验的单文件前端。
+   重点：移动端可用、视觉层级更稳、交互反馈更清楚、素材替换更友好。
+   ========================================================= */
+
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --vh:1vh;
+}
+
+html{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+
+button,.btn,.table-obj,.note-card,.spot,.jar,.umbrella,.door,.hold-zone{
+  -webkit-tap-highlight-color:transparent;
+}
+
+button:focus-visible,.btn:focus-visible,.table-obj:focus-visible,.note-card:focus-visible,.spot:focus-visible{
+  outline:2px solid rgba(215,173,88,.9);
+  outline-offset:3px;
+}
+
+button{
+  user-select:none;
+}
+
+.app{
+  min-height:calc(var(--vh, 1vh) * 100);
+}
+
+/* 素材替换能力：给任意 .image-slot 写 style="--img:url('你的图片.jpg')" 即可直接变成图片卡片 */
+.image-slot[style*="--img"]{
+  background-image:
+    linear-gradient(0deg,rgba(5,3,4,.18),rgba(5,3,4,.18)),
+    var(--img);
+  background-size:cover;
+  background-position:center;
+  color:transparent;
+}
+
+.scene-bg[style*="--bg-img"]{
+  background-image:
+    radial-gradient(circle at 52% 42%,rgba(125,29,45,.18),transparent 45%),
+    linear-gradient(90deg,rgba(8,5,6,.95) 0%,rgba(8,5,6,.65) 32%,rgba(8,5,6,.42) 68%,rgba(8,5,6,.88) 100%),
+    var(--bg-img);
+  background-size:cover;
+  background-position:center;
+}
+
+.scene-bg[style*="--bg-img"]::before{
+  opacity:0;
+}
+
+.image-slot,.mirror-stage,.tear-bg,.cards-area,.hotspots,.meteor-field,.jar,.door{
+  position:relative;
+  isolation:isolate;
+}
+
+.image-slot::before,.mirror-stage::before,.tear-bg::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 28% 18%,rgba(215,173,88,.12),transparent 26%),
+    linear-gradient(135deg,rgba(255,255,255,.06),transparent 38%,rgba(0,0,0,.22));
+  mix-blend-mode:screen;
+  opacity:.62;
+}
+
+.panel{
+  transform:translateZ(0);
+}
+
+.panel:hover{
+  border-color:rgba(215,173,88,.28);
+  box-shadow:0 26px 96px rgba(0,0,0,.52);
+}
+
+.scene.active .copy{
+  animation:copyIn .72s ease both;
+}
+
+.scene.active .interaction{
+  animation:panelIn .78s .06s ease both;
+}
+
+@keyframes copyIn{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes panelIn{
+  from{opacity:0;transform:translateY(22px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.nav button{
+  position:relative;
+  overflow:hidden;
+}
+
+.nav button::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:linear-gradient(var(--deep),var(--gold));
+  opacity:0;
+  transition:.25s ease;
+}
+
+.nav button.active::after{
+  opacity:1;
+}
+
+.controls button,.tools button{
+  min-height:40px;
+}
+
+.toast{
+  font-size:14px;
+}
+
+/* 更像成品的开场桌面 */
+.memory-table::before{
+  content:"";
+  position:absolute;
+  right:-90px;
+  top:-90px;
+  width:260px;
+  height:260px;
+  border-radius:50%;
+  border:1px solid rgba(215,173,88,.16);
+  background:radial-gradient(circle,rgba(215,173,88,.12),transparent 62%);
+}
+
+.memory-table::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:110px;
+  background:linear-gradient(0deg,rgba(0,0,0,.34),transparent);
+  pointer-events:none;
+}
+
+/* 中等屏：保留左右结构，但减轻拥挤 */
+@media (max-width:1280px){
+  .nav{
+    width:176px;
+    left:18px;
+  }
+  .layout{
+    grid-template-columns:220px minmax(340px,42vw) minmax(420px,1fr);
+    gap:24px;
+    padding-left:198px;
+    padding-right:34px;
+  }
+  .copy h1{font-size:56px}
+  .copy h2{font-size:40px}
+  .copy p{font-size:18px}
+  .copy .quote{font-size:31px}
+  .interaction{min-height:560px}
+  .panel{min-height:480px}
+  .image-slot{height:410px}
+  .story-panel .image-slot{height:280px}
+}
+
+/* 手机和平板：原模板会直接拦截，这里改成可真实体验 */
+@media (max-width:1000px){
+  html,body{
+    height:100%;
+    overflow:hidden;
+  }
+
+  body::before{
+    background-size:auto,auto,46px 46px,46px 46px;
+    opacity:.52;
+  }
+
+  .desktop-note{
+    display:none!important;
+  }
+
+  .app{
+    display:block!important;
+    width:100vw;
+    height:calc(var(--vh, 1vh) * 100);
+    overflow:hidden;
+  }
+
+  .opening{
+    display:grid!important;
+    padding:calc(18px + var(--safe-top)) calc(14px + var(--safe-right)) calc(18px + var(--safe-bottom)) calc(14px + var(--safe-left));
+  }
+
+  .memory-table{
+    width:min(94vw,560px);
+    height:auto;
+    min-height:74vh;
+    border-radius:28px;
+    padding:34px 22px 112px;
+  }
+
+  .memory-table h1{
+    font-size:38px;
+    max-width:100%;
+  }
+
+  .memory-table p{
+    font-size:14px;
+  }
+
+  .table-obj{
+    min-width:104px;
+    padding:14px 12px;
+    border-radius:18px;
+  }
+
+  .table-obj .icon{
+    font-size:28px;
+  }
+
+  #obj-1{right:22px;top:168px}
+  #obj-2{right:128px;bottom:120px}
+  #obj-3{left:22px;bottom:128px}
+
+  .enter-area{
+    left:22px;
+    right:22px;
+    bottom:24px;
+    flex-wrap:wrap;
+  }
+
+  .topbar{
+    display:flex!important;
+    top:calc(10px + var(--safe-top));
+    left:calc(12px + var(--safe-left));
+    right:calc(12px + var(--safe-right));
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .brand{
+    max-width:50vw;
+    font-size:10px;
+    line-height:1.6;
+    letter-spacing:.12em;
+  }
+
+  .brand b{
+    display:block;
+    font-size:13px;
+  }
+
+  .tools{
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .tools button{
+    padding:8px 10px;
+    font-size:12px;
+  }
+
+  .nav{
+    display:flex!important;
+    left:calc(10px + var(--safe-left));
+    right:calc(10px + var(--safe-right));
+    bottom:calc(12px + var(--safe-bottom));
+    top:auto;
+    z-index:52;
+    transform:none;
+    width:auto;
+    flex-direction:row;
+    overflow-x:auto;
+    gap:8px;
+    padding:4px;
+    border:1px solid rgba(238,230,220,.13);
+    border-radius:18px;
+    background:rgba(8,5,6,.72);
+    backdrop-filter:blur(18px);
+    scrollbar-width:none;
+  }
+
+  .nav::-webkit-scrollbar{
+    display:none;
+  }
+
+  .nav button{
+    min-width:92px;
+    grid-template-columns:1fr;
+    gap:2px;
+    padding:8px 10px;
+    border-radius:14px;
+    text-align:center;
+    font-size:11px;
+  }
+
+  .nav button span:first-child{
+    font-size:10px;
+  }
+
+  .artifact-box{
+    display:none!important;
+  }
+
+  .controls{
+    display:flex!important;
+    right:calc(12px + var(--safe-right));
+    bottom:calc(76px + var(--safe-bottom));
+    gap:8px;
+  }
+
+  .controls button{
+    padding:9px 12px;
+    font-size:12px;
+    background:rgba(8,5,6,.70);
+  }
+
+  .scene{
+    height:calc(var(--vh, 1vh) * 100);
+    overflow:hidden;
+  }
+
+  .scene-bg::before{
+    inset:12vh 5vw 22vh;
+    border-radius:26px;
+    font-size:11px;
+  }
+
+  .layout,
+  .layout[style]{
+    display:flex!important;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    gap:14px;
+    height:100%;
+    overflow-y:auto;
+    padding:
+      calc(86px + var(--safe-top))
+      calc(14px + var(--safe-right))
+      calc(138px + var(--safe-bottom))
+      calc(14px + var(--safe-left))!important;
+    scroll-behavior:smooth;
+  }
+
+  .copy{
+    max-width:100%;
+    grid-column:auto;
+    padding:0 2px;
+  }
+
+  .copy .chapter{
+    font-size:10px;
+    margin-bottom:10px;
+    letter-spacing:.24em;
+  }
+
+  .copy h1{
+    font-size:42px;
+    line-height:1.02;
+    margin-bottom:14px;
+  }
+
+  .copy h2{
+    font-size:30px;
+    line-height:1.15;
+    margin-bottom:12px;
+  }
+
+  .copy p{
+    font-size:15px;
+    line-height:1.72;
+    margin-bottom:10px;
+  }
+
+  .copy .quote{
+    font-size:24px;
+    line-height:1.42;
+    margin:10px 0 12px;
+  }
+
+  .copy .micro{
+    font-size:12px;
+  }
+
+  .interaction{
+    grid-column:auto;
+    min-height:auto;
+    align-items:stretch;
+    justify-content:flex-start;
+  }
+
+  .panel{
+    width:100%;
+    min-height:auto;
+    padding:16px;
+    border-radius:22px;
+  }
+
+  .panel::before{
+    border-radius:22px;
+  }
+
+  .image-slot{
+    height:min(48vh,330px);
+    border-radius:18px;
+    font-size:11px;
+  }
+
+  .story-panel{
+    min-height:auto;
+  }
+
+  .story-panel .image-slot{
+    height:min(34vh,260px);
+  }
+
+  .story-lines{
+    gap:8px;
+  }
+
+  .story-lines p{
+    font-size:14px;
+    line-height:1.72;
+  }
+
+  .story-meta{
+    margin-bottom:10px;
+    font-size:10px;
+  }
+
+  .cards-area,
+  .hotspots,
+  .tear-box,
+  .hold-zone,
+  .jar,
+  .meteor-field,
+  .door,
+  .mirror-stage{
+    height:min(48vh,330px);
+    border-radius:18px;
+  }
+
+  .ring-canvas,.draw-canvas{
+    width:100%;
+    height:170px;
+  }
+
+  .magic-grid{
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+
+  .magic-card{
+    height:76px;
+    border-radius:12px;
+  }
+
+  .magic-card.flipped{
+    font-size:28px;
+  }
+
+  .note-card{
+    width:128px;
+    height:174px;
+    font-size:15px;
+    padding:12px;
+  }
+
+  .note-card b{
+    font-size:22px;
+  }
+
+  .tip{
+    left:12px;
+    right:12px;
+    bottom:12px;
+    padding:12px;
+    font-size:13px;
+  }
+
+  .spot{
+    width:34px;
+    height:34px;
+  }
+
+  .spot::after{
+    inset:10px;
+  }
+
+  .dossier{
+    inset:18px;
+    padding:20px;
+  }
+
+  .dossier h3{
+    font-size:20px;
+  }
+
+  .dossier p{
+    font-size:14px;
+  }
+
+  .hold-big{
+    font-size:30px;
+  }
+
+  .umbrella{
+    width:118px;
+    height:118px;
+    font-size:72px;
+  }
+
+  .relics{
+    gap:6px;
+  }
+
+  .relics button{
+    font-size:12px;
+  }
+
+  .final-card{
+    padding:26px 18px;
+    border-radius:24px;
+  }
+
+  .final-card h2{
+    font-size:32px;
+  }
+
+  .final-card p{
+    font-size:15px;
+  }
+
+  .toast{
+    left:calc(12px + var(--safe-left));
+    right:calc(12px + var(--safe-right));
+    top:calc(72px + var(--safe-top));
+    min-width:0;
+    max-width:none;
+    font-size:13px;
+    padding:13px 14px;
+  }
+}
+
+@media (max-width:430px){
+  .copy h1{font-size:36px}
+  .copy h2{font-size:27px}
+  .copy .quote{font-size:22px}
+  .tools button:nth-child(1){display:none}
+  .memory-table h1{font-size:34px}
+  #obj-2{right:92px}
+  .controls{
+    left:calc(12px + var(--safe-left));
+    right:calc(12px + var(--safe-right));
+    justify-content:space-between;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+    transition-duration:.001ms!important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="desktop-note">
+  <h1>请在电脑端打开</h1>
+  <p>这是桌面端互动网页模板，默认使用鼠标滚动、点击、悬停、拖拽、长按、擦拭等交互。手机端可另行适配。</p>
+</div>
+
+<div class="progress" id="progress"></div>
+<audio id="bgmAudio" loop preload="auto" src=""></audio>
+
+<div class="opening" id="opening">
+  <div class="memory-table">
+    <div class="brand">STORY WEB TEMPLATE</div>
+    <h1>[开场标题]</h1>
+    <p>[开场说明：可写“先触碰三件道具，再进入故事”。这里是空模板占位文案。]</p>
+    <div class="table-obj" data-say="[道具 1 已触发]" id="obj-1"><span class="icon">Ⅰ</span><span class="txt">道具 1</span></div>
+    <div class="table-obj" data-say="[道具 2 已触发]" id="obj-2"><span class="icon">Ⅱ</span><span class="txt">道具 2</span></div>
+    <div class="table-obj" data-say="[道具 3 已触发]" id="obj-3"><span class="icon">Ⅲ</span><span class="txt">道具 3</span></div>
+    <div class="enter-area">
+      <button disabled id="enterBtn">进入故事</button>
+      <span class="open-status" id="openStatus">已触碰 0 / 3</span>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand"><b>[作品标题]</b> · Desktop Interactive Template</div>
+  <div class="tools">
+    <button disabled id="secondBtn">开启二刷</button>
+    <button id="musicBtn">播放 BGM</button>
+  </div>
+</div>
+
+<nav class="nav" id="nav"></nav>
+<div class="artifact-box" id="artifactBox"><span class="label">收集栏</span></div>
+<div class="controls"><button id="prevBtn">上一幕</button><button id="nextBtn">下一幕</button></div>
+<div class="toast" id="toast"></div>
+
+<main class="app" id="app">
+  <section class="scene active" data-artifact="cover" data-nav="封面">
+    <div class="scene-bg" data-slot="COVER IMAGE SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">CHAPTER 00</div>
+        <h1>[封面主标题]</h1>
+        <p class="quote">[封面金句 / 情绪句]</p>
+        <p class="micro">[玩法提示 / 项目说明]</p>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="image-slot">MAIN VISUAL SLOT</div>
+          <div class="result">[封面提示文本]</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="story-a" data-nav="剧情页A">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">PROLOGUE</div>
+        <h2>[章节标题]</h2>
+        <p class="quote">[章节金句]</p>
+        <p>[章节导语]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel story-panel">
+          <div class="image-slot">IMAGE SLOT</div>
+          <div class="story-meta">TIME / PLACE / NOTE</div>
+          <div class="story-lines">
+            <p>[剧情段落 1]</p>
+            <p>[剧情段落 2]</p>
+            <p>[剧情段落 3]</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="search" data-nav="搜寻卡片">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · SEARCH</div>
+        <h2>[鼠标搜寻章节]</h2>
+        <p class="quote">[搜寻交互金句]</p>
+        <p>[交互说明：移动鼠标当作光源，找到隐藏卡片。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="cards-area" id="cardsArea">
+            <div class="light-hint">移动鼠标寻找隐藏卡片</div>
+            <div class="note-card" data-note="[隐藏卡片 1 内容]" style="left:8%;top:16%;--r:-8deg"><b>01</b><small>CARD</small><p>[卡片文字]</p></div>
+            <div class="note-card" data-note="[隐藏卡片 2 内容]" style="left:38%;top:42%;--r:6deg"><b>02</b><small>CARD</small><p>[卡片文字]</p></div>
+            <div class="note-card" data-note="[隐藏卡片 3 内容]" style="right:8%;top:14%;--r:10deg"><b>03</b><small>CARD</small><p>[卡片文字]</p></div>
+          </div>
+          <div class="result" id="notesResult">找到 0 / 3 张卡片。</div>
+          <div class="page-hidden"><button data-hidden="[隐藏旁白示例]">隐藏旁白</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="hotspot" data-nav="热点图">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · HOTSPOT</div>
+        <h2>[热点章节]</h2>
+        <p class="quote">[热点交互金句]</p>
+        <p>[交互说明：悬停光点查看细节。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="hotspots">
+            <div class="image-slot">IMAGE SLOT</div>
+            <button class="spot" data-tip="[热点 1 文案]" style="left:26%;top:60%"></button>
+            <button class="spot" data-tip="[热点 2 文案]" style="left:25%;top:18%"></button>
+            <button class="spot" data-tip="[热点 3 文案]" style="left:69%;top:70%"></button>
+            <div class="tip"></div>
+          </div>
+          <div class="hint">悬停光点：热点 1 / 热点 2 / 热点 3</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="story-b" data-nav="剧情页B">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">STORY PAGE</div>
+        <h2>[章节标题]</h2>
+        <p class="quote">[章节金句]</p>
+        <p>[章节导语]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel story-panel">
+          <div class="image-slot">IMAGE SLOT</div>
+          <div class="story-meta">TIME / PLACE / NOTE</div>
+          <div class="story-lines">
+            <p>[剧情段落 1]</p>
+            <p>[剧情段落 2]</p>
+            <p>[剧情段落 3]</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="circle" data-nav="画圆翻牌">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · DRAW</div>
+        <h2>[画圆章节]</h2>
+        <p class="quote">[画圆交互金句]</p>
+        <p>[交互说明：按住鼠标画一圈，然后翻开卡牌。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <canvas class="ring-canvas" height="230" id="ringCanvas" width="560"></canvas>
+          <div class="magic-grid" id="magicGrid"></div>
+          <div class="result" id="ringResult">按住鼠标，在这里画一圈。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="click" data-nav="点击揭示">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · CLICK</div>
+        <h2>[点击章节]</h2>
+        <p class="quote">[点击交互金句]</p>
+        <p>[交互说明：点击画面上的按钮，推进一句反馈。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="image-slot">IMAGE SLOT</div>
+          <button id="clickReveal" style="position:absolute;left:40%;top:43%;z-index:6">点击触发</button>
+          <div class="result" id="clickResult">[默认反馈]</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="write" data-nav="书写点燃">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · WRITE</div>
+        <h2>[书写章节]</h2>
+        <p class="quote">[书写交互金句]</p>
+        <p>[交互说明：在画布上书写，然后点击点燃。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <canvas class="draw-canvas" height="230" id="drawCanvas" width="560"></canvas>
+          <div class="flame" id="flame"></div>
+          <div class="burnbar" id="burnbar"><i></i></div>
+          <div class="result" id="drawResult">按住鼠标，在这里写下关键词。</div>
+          <button id="fireBtn" style="margin-top:12px">点燃</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="story-c" data-nav="剧情页C">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">STORY PAGE</div>
+        <h2>[章节标题]</h2>
+        <p class="quote">[章节金句]</p>
+        <p>[章节导语]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel story-panel">
+          <div class="image-slot">IMAGE SLOT</div>
+          <div class="story-meta">TIME / PLACE / NOTE</div>
+          <div class="story-lines">
+            <p>[剧情段落 1]</p>
+            <p>[剧情段落 2]</p>
+            <p>[剧情段落 3]</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="tear" data-nav="拖拽撕开">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · DRAG</div>
+        <h2>[拖拽章节]</h2>
+        <p class="quote">[拖拽交互金句]</p>
+        <p>[交互说明：拖动金色竖条，揭开另一层信息。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="tear-box" id="tearBox" style="--tear:52%">
+            <div class="tear-bg">IMAGE SLOT</div>
+            <div class="dossier">
+              <h3>[隐藏标题]</h3>
+              <p>[隐藏信息 1]</p>
+              <p>[隐藏信息 2]</p>
+              <p>[隐藏信息 3]</p>
+            </div>
+            <div class="dragbar" id="dragbar"></div>
+          </div>
+          <div class="result" id="tearResult">向右拖拽，揭开信息。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="hold" data-nav="长按">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · HOLD</div>
+        <h2>[长按章节]</h2>
+        <p class="quote">[长按交互金句]</p>
+        <p>[交互说明：按住不放，完成进度。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="hold-zone" id="holdZone">
+            <div class="hold-content">
+              <div class="hold-big">按住，别松手。</div>
+              <div class="hold-small">长按 3 秒完成触发。</div>
+            </div>
+            <div class="bloodline"></div>
+          </div>
+          <div class="result" id="holdResult">长按完成本段交互。</div>
+          <div class="page-hidden"><button data-hidden="[隐藏旁白示例]">隐藏旁白</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="story-d" data-nav="剧情页D">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">STORY PAGE</div>
+        <h2>[章节标题]</h2>
+        <p class="quote">[章节金句]</p>
+        <p>[章节导语]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel story-panel">
+          <div class="image-slot">IMAGE SLOT</div>
+          <div class="story-meta">TIME / PLACE / NOTE</div>
+          <div class="story-lines">
+            <p>[剧情段落 1]</p>
+            <p>[剧情段落 2]</p>
+            <p>[剧情段落 3]</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="jar" data-nav="点击容器">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · OBJECT</div>
+        <h2>[容器章节]</h2>
+        <p class="quote">[容器交互金句]</p>
+        <p>[交互说明：点击容器，切换状态并显示反馈。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="jar" id="jar"><div class="ghost">?</div></div>
+          <div class="result" id="jarResult">点击容器。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="meteor" data-nav="粒子雨">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · PARTICLES</div>
+        <h2>[粒子章节]</h2>
+        <p class="quote">[粒子交互金句]</p>
+        <p>[交互说明：点击中心物件，触发下落粒子。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="meteor-field" id="meteorField"><div class="umbrella" id="particleTrigger">✦</div></div>
+          <div class="result" id="meteorResult">点击中心物件。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="mirror" data-nav="擦拭">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · WIPE</div>
+        <h2>[擦拭章节]</h2>
+        <p class="quote">[擦拭交互金句]</p>
+        <p>[交互说明：按住鼠标擦去雾气，再点击下方按钮。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="mirror-stage" id="mirrorStage">IMAGE SLOT<div class="fog" id="fog"></div></div>
+          <div class="relics">
+            <button data-relic="[按钮反馈 1]">按钮 1</button>
+            <button data-relic="[按钮反馈 2]">按钮 2</button>
+            <button data-relic="[按钮反馈 3]">按钮 3</button>
+            <button data-relic="[按钮反馈 4]">按钮 4</button>
+          </div>
+          <div class="result" id="mirrorResult">按住鼠标，在画面上擦拭。</div>
+          <div class="page-hidden"><button data-hidden="[隐藏旁白示例]">隐藏旁白</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="gate" data-nav="守门长按">
+    <div class="scene-bg" data-slot="BACKGROUND SLOT"></div>
+    <div class="layout">
+      <div></div>
+      <div class="copy">
+        <div class="chapter">INTERACTION · GATE</div>
+        <h2>[守门章节]</h2>
+        <p class="quote">[守门交互金句]</p>
+        <p>[交互说明：按住区域，逐步出现反馈。]</p>
+        <div class="second-note">[二刷补充文本]</div>
+      </div>
+      <div class="interaction">
+        <div class="panel">
+          <div class="door" id="door">
+            <div class="door-inner">
+              <div class="hold-big">按住这里</div>
+              <div class="hold-small">等待进度完成。</div>
+            </div>
+            <div class="door-progress"></div>
+          </div>
+          <div class="result" id="doorResult">[默认反馈]</div>
+          <div class="family-choices" id="choiceButtons">
+            <button data-choice="[选择反馈 A]">选择 A</button>
+            <button data-choice="[选择反馈 B]">选择 B</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-artifact="end" data-nav="结尾">
+    <div class="scene-bg" data-slot="FINAL BACKGROUND SLOT"></div>
+    <div class="layout" style="grid-template-columns:1fr;padding-left:260px">
+      <div class="final-card">
+        <div class="chapter">FINAL</div>
+        <h2>[结尾标题]</h2>
+        <p>[结尾正文 / 总结句]</p>
+        <p class="quote" style="font-size:32px">[结尾金句]</p>
+        <button id="unlockSecond">开启二刷批注</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  const $=(s,root=document)=>root.querySelector(s);
+  const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
+  const scenes=$$('.scene');
+  const nav=$('#nav');
+  const progress=$('#progress');
+  const toast=$('#toast');
+  const got=new Set();
+  let current=0;
+  let lock=false;
+  let musicOn=false;
+  let second=false;
+  let particleUsed=false;
+
+  const artifactMap=[
+    ['cover','00'],['story-a','01'],['search','02'],['hotspot','03'],['story-b','04'],
+    ['circle','05'],['click','06'],['write','07'],['story-c','08'],['tear','09'],
+    ['hold','10'],['story-d','11'],['jar','12'],['meteor','13'],['mirror','14'],
+    ['gate','15'],['end','✓']
+  ];
+
+  function showToast(text){
+    toast.textContent=text;
+    toast.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer=setTimeout(()=>toast.classList.remove('show'),2600);
+  }
+
+  function collect(key){
+    if(!key || got.has(key)) return;
+    got.add(key);
+    const el=$(`[data-a="${key}"]`);
+    if(el) el.classList.add('got');
+  }
+
+  artifactMap.forEach(([key,icon])=>{
+    const item=document.createElement('div');
+    item.className='artifact';
+    item.dataset.a=key;
+    item.title=key;
+    item.textContent=icon;
+    $('#artifactBox').appendChild(item);
+  });
+
+  scenes.forEach((scene,i)=>{
+    const btn=document.createElement('button');
+    btn.innerHTML=`<span>${String(i).padStart(2,'0')}</span><span>${scene.dataset.nav||'PAGE'}</span>`;
+    btn.onclick=()=>go(i);
+    nav.appendChild(btn);
+  });
+
+  function update(){
+    $$('#nav button').forEach((btn,i)=>btn.classList.toggle('active',i===current));
+    progress.style.width=((current+1)/scenes.length*100)+'%';
+    $('#prevBtn').disabled=current===0;
+    $('#nextBtn').disabled=current===scenes.length-1;
+    if(current===scenes.length-1) $('#secondBtn').disabled=false;
+  }
+
+  function go(index){
+    if(index<0 || index>=scenes.length || index===current) return;
+    scenes[current].classList.remove('active');
+    current=index;
+    scenes[current].classList.add('active');
+    collect(scenes[current].dataset.artifact);
+    update();
+  }
+
+  update();
+  collect(scenes[0].dataset.artifact);
+
+  $('#prevBtn').onclick=()=>go(current-1);
+  $('#nextBtn').onclick=()=>go(current+1);
+
+  window.addEventListener('keydown',event=>{
+    if(event.key==='ArrowDown' || event.key==='ArrowRight') go(current+1);
+    if(event.key==='ArrowUp' || event.key==='ArrowLeft') go(current-1);
+  });
+
+  window.addEventListener('wheel',event=>{
+    if($('#opening') && !$('#opening').classList.contains('done')) return;
+    if(lock) return;
+    lock=true;
+    setTimeout(()=>lock=false,820);
+    if(event.deltaY>0) go(current+1);
+    else go(current-1);
+  },{passive:true});
+
+  const opened=new Set();
+  $$('.table-obj').forEach(obj=>{
+    obj.onclick=()=>{
+      opened.add(obj.id);
+      obj.classList.add('opened');
+      showToast(obj.dataset.say || '[已触发]');
+      $('#openStatus').textContent=`已触碰 ${opened.size} / 3`;
+      if(opened.size>=3) $('#enterBtn').disabled=false;
+    };
+  });
+
+  $('#enterBtn').onclick=()=>{
+    $('#opening').classList.add('done');
+    if(!musicOn) playBgm();
+  };
+
+  const bgmAudio=$('#bgmAudio');
+  if(bgmAudio) bgmAudio.volume=.42;
+
+  async function playBgm(){
+    if(!bgmAudio || !bgmAudio.getAttribute('src')){
+      showToast('请先在 audio#bgmAudio 的 src 里填入 BGM 路径。');
+      return;
+    }
+    $('#musicBtn').classList.add('loading');
+    try{
+      await bgmAudio.play();
+      musicOn=true;
+      $('#musicBtn').classList.remove('loading');
+      $('#musicBtn').classList.add('playing');
+      $('#musicBtn').textContent='暂停 BGM';
+    }catch(err){
+      $('#musicBtn').classList.remove('loading');
+      showToast('浏览器拦截了自动播放，请手动点击播放。');
+    }
+  }
+
+  $('#musicBtn').onclick=()=>{
+    if(!bgmAudio || !bgmAudio.getAttribute('src')){
+      showToast('请先填入 BGM 路径。');
+      return;
+    }
+    if(musicOn){
+      bgmAudio.pause();
+      musicOn=false;
+      $('#musicBtn').classList.remove('playing');
+      $('#musicBtn').textContent='播放 BGM';
+    }else{
+      playBgm();
+    }
+  };
+
+  $('#secondBtn').onclick=toggleSecond;
+  $('#unlockSecond').onclick=toggleSecond;
+
+  function toggleSecond(){
+    second=!second;
+    document.body.classList.toggle('second',second);
+    $('#secondBtn').textContent=second?'关闭二刷':'开启二刷';
+    showToast(second?'二刷批注已开启。':'二刷批注已关闭。');
+  }
+
+  const cardsArea=$('#cardsArea');
+  if(cardsArea){
+    cardsArea.addEventListener('mousemove',event=>{
+      const rect=cardsArea.getBoundingClientRect();
+      const x=event.clientX-rect.left;
+      const y=event.clientY-rect.top;
+      cardsArea.style.setProperty('--mx',`${x}px`);
+      cardsArea.style.setProperty('--my',`${y}px`);
+      $$('.note-card',cardsArea).forEach(card=>{
+        const cr=card.getBoundingClientRect();
+        const cx=cr.left+cr.width/2;
+        const cy=cr.top+cr.height/2;
+        const d=Math.hypot(event.clientX-cx,event.clientY-cy);
+        card.classList.toggle('near',d<180);
+      });
+    });
+    let found=0;
+    $$('.note-card',cardsArea).forEach(card=>{
+      card.onclick=()=>{
+        if(!card.classList.contains('found')){
+          card.classList.add('found');
+          found++;
+          $('#notesResult').textContent=`找到 ${found} / 3 张卡片。\n${card.dataset.note || ''}`;
+          if(found>=3) collect('search');
+        }
+      };
+    });
+  }
+
+  $$('.hotspots').forEach(area=>{
+    const tip=$('.tip',area);
+    $$('.spot',area).forEach(spot=>{
+      spot.addEventListener('mouseenter',()=>{
+        tip.textContent=spot.dataset.tip || '[热点文本]';
+        tip.classList.add('show');
+        collect('hotspot');
+      });
+      spot.addEventListener('mouseleave',()=>tip.classList.remove('show'));
+    });
+  });
+
+  function drawCanvas(canvas,resultEl,doneText,onDone){
+    if(!canvas) return;
+    const ctx=canvas.getContext('2d');
+    let drawing=false;
+    let points=0;
+    ctx.strokeStyle='rgba(215,173,88,.86)';
+    ctx.lineWidth=2;
+    ctx.lineCap='round';
+
+    function pos(event){
+      const rect=canvas.getBoundingClientRect();
+      return {
+        x:(event.clientX-rect.left)*(canvas.width/rect.width),
+        y:(event.clientY-rect.top)*(canvas.height/rect.height)
+      };
+    }
+
+    canvas.addEventListener('pointerdown',event=>{
+      drawing=true;
+      points=0;
+      const p=pos(event);
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y);
+    });
+    canvas.addEventListener('pointermove',event=>{
+      if(!drawing) return;
+      const p=pos(event);
+      ctx.lineTo(p.x,p.y);
+      ctx.stroke();
+      points++;
+      if(points>65){
+        resultEl.textContent=doneText;
+        if(onDone) onDone();
+      }
+    });
+    window.addEventListener('pointerup',()=>drawing=false);
+  }
+
+  drawCanvas($('#ringCanvas'),$('#ringResult'),'已完成画圆。现在可以翻开卡牌。',()=>collect('circle'));
+  drawCanvas($('#drawCanvas'),$('#drawResult'),'已留下关键词。',()=>collect('write'));
+
+  const magicGrid=$('#magicGrid');
+  if(magicGrid){
+    for(let i=1;i<=8;i++){
+      const card=document.createElement('div');
+      card.className='magic-card';
+      card.innerHTML='<span>?</span>';
+      card.onclick=()=>{
+        card.classList.add('flipped');
+        card.innerHTML=`<span>${i}</span>`;
+        if($$('.magic-card.flipped',magicGrid).length>=2){
+          $('#ringResult').textContent='已翻开两张卡牌。';
+          collect('circle');
+        }
+      };
+      magicGrid.appendChild(card);
+    }
+  }
+
+  $('#clickReveal').onclick=()=>{
+    $('#clickResult').textContent='[点击后的反馈文本]';
+    collect('click');
+  };
+
+  $('#fireBtn').onclick=()=>{
+    $('#flame').classList.add('burning');
+    $('#burnbar').classList.add('go');
+    setTimeout(()=>{
+      $('#drawResult').textContent='[点燃后的反馈文本]';
+      collect('write');
+    },1200);
+  };
+
+  const tearBox=$('#tearBox');
+  const dragbar=$('#dragbar');
+  if(tearBox && dragbar){
+    let dragging=false;
+    dragbar.addEventListener('pointerdown',event=>{
+      dragging=true;
+      event.preventDefault();
+    });
+    window.addEventListener('pointermove',event=>{
+      if(!dragging) return;
+      const rect=tearBox.getBoundingClientRect();
+      let pct=((event.clientX-rect.left)/rect.width)*100;
+      pct=Math.max(8,Math.min(92,pct));
+      tearBox.style.setProperty('--tear',pct+'%');
+      if(pct>72){
+        $('#tearResult').textContent='[拖拽揭示后的反馈文本]';
+        collect('tear');
+      }
+    });
+    window.addEventListener('pointerup',()=>dragging=false);
+  }
+
+  function longPress(zone,seconds,done,steps){
+    if(!zone) return;
+    const bar=$('.bloodline,.door-progress',zone);
+    let timer=null;
+    let start=0;
+    let stepIndex=-1;
+    function stop(){
+      clearInterval(timer);
+      timer=null;
+      zone.classList.remove('shake');
+      if(bar) bar.style.width='0%';
+      stepIndex=-1;
+    }
+    zone.addEventListener('pointerdown',()=>{
+      start=Date.now();
+      zone.classList.add('shake');
+      timer=setInterval(()=>{
+        const progress=Math.min(1,(Date.now()-start)/(seconds*1000));
+        if(bar) bar.style.width=(progress*100)+'%';
+        const nextStep=Math.floor(progress*(steps?.length||0));
+        if(steps && nextStep!==stepIndex && steps[nextStep]){
+          stepIndex=nextStep;
+          steps[nextStep]();
+        }
+        if(progress>=1){
+          stop();
+          done();
+        }
+      },45);
+    });
+    window.addEventListener('pointerup',stop);
+  }
+
+  longPress($('#holdZone'),3,()=>{
+    $('#holdResult').textContent='[长按完成后的反馈文本]';
+    collect('hold');
+  },[
+    ()=>$('#holdResult').textContent='[长按反馈 1]',
+    ()=>$('#holdResult').textContent='[长按反馈 2]',
+    ()=>$('#holdResult').textContent='[长按反馈 3]'
+  ]);
+
+  $('#jar').onclick=()=>{
+    $('#jar').classList.toggle('alt');
+    $('#jarResult').textContent='[容器被点击后的反馈文本]';
+    collect('jar');
+  };
+
+  $('#particleTrigger').onclick=()=>{
+    if(particleUsed) return;
+    particleUsed=true;
+    $('#particleTrigger').classList.add('gone');
+    for(let i=0;i<48;i++){
+      const star=document.createElement('i');
+      star.className='star';
+      star.style.left=Math.random()*100+'%';
+      star.style.animationDelay=(Math.random()*1.4)+'s';
+      star.style.setProperty('--t',(1.5+Math.random()*2.4)+'s');
+      $('#meteorField').appendChild(star);
+    }
+    $('#meteorResult').textContent='[粒子雨触发后的反馈文本]';
+    collect('meteor');
+  };
+
+  let fog=1;
+  let wiping=false;
+  $('#fog').addEventListener('pointerdown',()=>wiping=true);
+  $('#fog').addEventListener('pointermove',()=>{
+    if(!wiping) return;
+    fog=Math.max(0,fog-.055);
+    $('#fog').style.opacity=fog;
+    if(fog<.24){
+      $('#mirrorResult').textContent='[擦拭完成后的反馈文本]';
+      collect('mirror');
+    }
+  });
+  window.addEventListener('pointerup',()=>wiping=false);
+
+  $$('.relics button').forEach(btn=>{
+    btn.onclick=()=>{
+      $('#mirrorResult').textContent=btn.dataset.relic || '[按钮反馈]';
+      collect('mirror');
+    };
+  });
+
+  longPress($('#door'),4,()=>{
+    $('#doorResult').textContent='[守门完成后的反馈文本]';
+    $('#choiceButtons').classList.add('show');
+    collect('gate');
+  },[
+    ()=>$('#doorResult').textContent='[守门反馈 1]',
+    ()=>$('#doorResult').textContent='[守门反馈 2]',
+    ()=>$('#doorResult').textContent='[守门反馈 3]',
+    ()=>$('#doorResult').textContent='[守门反馈 4]'
+  ]);
+
+  $$('#choiceButtons button').forEach(btn=>{
+    btn.onclick=()=>$('#doorResult').textContent=btn.dataset.choice || '[选择反馈]';
+  });
+
+  $$('.page-hidden button').forEach(btn=>{
+    btn.onclick=()=>{
+      showToast(btn.dataset.hidden || '[隐藏旁白]');
+    };
+  });
+})();
+
+</script>
+
+<script>
+/* FRONTEND OPTIMIZATION PACK JS
+   补充：移动端真实视口高度、左右滑动翻页、按钮状态微交互。
+   不侵入原有剧情逻辑；只通过已有「上一幕 / 下一幕」按钮触发。 */
+(function(){
+  const root=document.documentElement;
+  const setVh=()=>root.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+  setVh();
+  window.addEventListener('resize', setVh, {passive:true});
+  window.addEventListener('orientationchange', setVh, {passive:true});
+
+  let startX=0,startY=0,startT=0;
+  const opening=document.getElementById('opening');
+
+  window.addEventListener('touchstart', event=>{
+    if(event.touches.length!==1) return;
+    const t=event.touches[0];
+    startX=t.clientX;
+    startY=t.clientY;
+    startT=Date.now();
+  },{passive:true});
+
+  window.addEventListener('touchend', event=>{
+    if(opening && !opening.classList.contains('done')) return;
+    const t=event.changedTouches && event.changedTouches[0];
+    if(!t) return;
+    const dx=t.clientX-startX;
+    const dy=t.clientY-startY;
+    const dt=Date.now()-startT;
+    if(dt>700 || Math.abs(dx)<58 || Math.abs(dx)<Math.abs(dy)*1.35) return;
+    const target=dx<0 ? document.getElementById('nextBtn') : document.getElementById('prevBtn');
+    if(target && !target.disabled) target.click();
+  },{passive:true});
+
+  // 自动给关键交互元素补 aria-label，路演时键盘/读屏体验更完整。
+  document.querySelectorAll('button:not([aria-label])').forEach(btn=>{
+    const text=(btn.textContent || btn.dataset.tip || btn.dataset.choice || btn.dataset.relic || '交互按钮').trim();
+    btn.setAttribute('aria-label', text || '交互按钮');
+  });
+
+  // 避免快速连续点击造成页面闪烁，给按钮一个极短的 pressed 状态。
+  document.addEventListener('click', event=>{
+    const btn=event.target.closest && event.target.closest('button,.btn,.table-obj');
+    if(!btn) return;
+    btn.classList.add('is-pressed');
+    setTimeout(()=>btn.classList.remove('is-pressed'),140);
+  },true);
+})();
+
+</body>
+</html>
